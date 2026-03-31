@@ -3267,7 +3267,7 @@ function subscribeToRoom(code) {
 function writeProgress() {
   if (!roomRef || !multiplayerMode || gameState !== 'playing' || eliminated) return;
   var now = Date.now();
-  if (now - lastProgressWrite < 500) return;
+  if (now - lastProgressWrite < 1000) return;
   lastProgressWrite = now;
   var progress = Math.min(1, mario.x / ((LEVEL_WIDTH - 15) * TILE));
   var updates = {};
@@ -3535,8 +3535,8 @@ async function joinRoom() {
       document.getElementById('joinError').textContent = 'Game already started';
       return;
     }
-    if (Object.keys(data.players || {}).length >= 8) {
-      document.getElementById('joinError').textContent = 'Room full (max 8)';
+    if (Object.keys(data.players || {}).length >= 4) {
+      document.getElementById('joinError').textContent = 'Room full (max 4)';
       return;
     }
     const playerData = {
