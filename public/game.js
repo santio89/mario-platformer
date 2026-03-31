@@ -3040,7 +3040,11 @@ function startSinglePlayer() {
 
 async function createRoom() {
   initFirebase();
+  const btn = document.querySelector('#menuCreate .menu-btn');
   const name = document.getElementById('createName').value.trim() || 'Mario';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>CREATING...';
+  document.getElementById('createError').textContent = '';
   try {
     let code = generateRoomCode();
     let existing = await db.collection('rooms').doc(code).get();
@@ -3072,14 +3076,21 @@ async function createRoom() {
   } catch (err) {
     document.getElementById('createError').textContent = 'Failed to create room';
     console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'CREATE';
   }
 }
 
 async function joinRoom() {
   initFirebase();
+  const btn = document.querySelector('#menuJoin .menu-btn');
   const code = document.getElementById('joinCode').value.trim().toUpperCase();
   const name = document.getElementById('joinName').value.trim() || 'Luigi';
   if (!code) { document.getElementById('joinError').textContent = 'Enter a room code'; return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>JOINING...';
+  document.getElementById('joinError').textContent = '';
   try {
     const snap = await db.collection('rooms').doc(code).get();
     if (!snap.exists) {
@@ -3114,6 +3125,9 @@ async function joinRoom() {
   } catch (err) {
     document.getElementById('joinError').textContent = 'Failed to join room';
     console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'JOIN';
   }
 }
 
