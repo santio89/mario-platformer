@@ -533,6 +533,60 @@ const KOOPA_SHELL = [
 ];
 const KOOPA_PALETTE = { 1: COL.koopa, 2: COL.white, 3: COL.black, 4: COL.koopa, 5: COL.koopaDark, 6: '#fcbcb0' };
 
+// Bowser boss sprite (32x32)
+const BOWSER_SPRITE = [
+  [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,1,2,2,1,0,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,1,2,2,2,2,1,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,2,2,2,2,2,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,1,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,1,3,3,1,1,1,1,1,1,1,1,1,1,3,3,1,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,1,3,4,4,3,3,3,3,3,3,3,3,3,3,4,4,3,1,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,1,3,4,4,5,5,3,3,3,3,3,3,3,3,5,5,4,4,3,1,0,0,0,0,0,0,0],
+  [0,0,0,0,0,1,3,4,5,6,6,5,5,3,3,3,3,5,5,6,6,5,4,3,1,0,0,0,0,0,0,0],
+  [0,0,0,0,1,3,3,4,5,5,5,5,3,3,3,3,3,3,5,5,5,5,4,3,3,1,0,0,0,0,0,0],
+  [0,0,0,0,1,3,3,3,4,4,4,3,3,3,3,3,3,3,3,4,4,4,3,3,3,1,0,0,0,0,0,0],
+  [0,0,0,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,0,0,0,0,0],
+  [0,0,0,1,3,3,3,3,3,3,3,7,7,7,7,7,7,7,7,3,3,3,3,3,3,3,1,0,0,0,0,0],
+  [0,0,1,3,3,3,3,3,3,3,7,7,8,7,8,7,8,7,8,7,3,3,3,3,3,3,3,1,0,0,0,0],
+  [0,0,1,3,3,3,3,3,3,7,7,8,8,7,8,7,8,8,7,7,3,3,3,3,3,3,3,1,0,0,0,0],
+  [0,0,1,3,3,3,3,3,3,7,8,8,7,7,8,7,7,8,8,7,3,3,3,3,3,3,3,1,0,0,0,0],
+  [0,0,1,3,3,3,3,3,3,7,7,7,7,7,7,7,7,7,7,7,3,3,3,3,3,3,3,1,0,0,0,0],
+  [0,0,0,1,3,3,3,3,3,3,7,7,7,7,7,7,7,7,7,3,3,3,3,3,3,3,1,0,0,0,0,0],
+  [0,0,0,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,0,0,0,0,0],
+  [0,0,0,0,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,1,0,0,0,0,0,0],
+  [0,0,0,0,0,1,3,3,1,3,3,3,3,3,3,3,3,3,3,3,3,1,3,3,1,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,1,1,9,1,3,3,3,3,3,3,3,3,3,3,1,9,1,1,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,1,9,9,1,3,3,3,3,3,3,3,3,1,9,9,1,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,1,9,9,1,3,3,3,3,3,3,3,3,1,9,9,1,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,1,9,9,1,3,3,3,3,3,3,1,9,9,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,1,9,9,1,3,3,3,3,3,3,1,9,9,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,1,9,1,1,1,3,3,1,1,1,9,1,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,1,9,9,1,3,3,1,9,9,1,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,1,9,9,1,3,3,1,9,9,1,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,1,1,9,1,0,1,1,0,1,9,1,1,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,1,9,9,1,0,0,0,0,0,0,1,9,9,1,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0],
+];
+const BOWSER_PALETTE = {
+  1: '#d03000', 2: '#ff6020', 3: '#00a800', 4: '#80d010',
+  5: '#fcfcfc', 6: '#000000', 7: '#e8c830', 8: '#a07000',
+  9: '#e8c830',
+};
+
+// Boss fireball sprite (8x8)
+const FIREBALL_SPRITE = [
+  [0,0,1,1,1,1,0,0],
+  [0,1,2,2,2,2,1,0],
+  [1,2,3,3,2,2,2,1],
+  [1,2,3,2,2,2,2,1],
+  [1,2,2,2,2,3,2,1],
+  [1,2,2,2,3,3,2,1],
+  [0,1,2,2,2,2,1,0],
+  [0,0,1,1,1,1,0,0],
+];
+const FIREBALL_PALETTE = { 1: '#ff4000', 2: '#ff8000', 3: '#ffe000' };
+
 // ================================================================
 // SOUND EFFECTS (Web Audio - NES style)
 // ================================================================
@@ -621,6 +675,30 @@ function playSound(type) {
         osc.type = 'square';
         gain.gain.setValueAtTime(0.04, c.currentTime);
         osc.frequency.setValueAtTime(440, c.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.15);
+        osc.start(c.currentTime); osc.stop(c.currentTime + 0.15);
+        break;
+      case 'bosshit':
+        osc.type = 'sawtooth';
+        gain.gain.setValueAtTime(0.08, c.currentTime);
+        osc.frequency.setValueAtTime(200, c.currentTime);
+        osc.frequency.linearRampToValueAtTime(80, c.currentTime + 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.25);
+        osc.start(c.currentTime); osc.stop(c.currentTime + 0.25);
+        break;
+      case 'bossdie':
+        osc.type = 'sawtooth';
+        gain.gain.setValueAtTime(0.08, c.currentTime);
+        osc.frequency.setValueAtTime(300, c.currentTime);
+        osc.frequency.linearRampToValueAtTime(40, c.currentTime + 0.8);
+        gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 1.0);
+        osc.start(c.currentTime); osc.stop(c.currentTime + 1.0);
+        break;
+      case 'fireball':
+        osc.type = 'sawtooth';
+        gain.gain.setValueAtTime(0.05, c.currentTime);
+        osc.frequency.setValueAtTime(600, c.currentTime);
+        osc.frequency.linearRampToValueAtTime(200, c.currentTime + 0.12);
         gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.15);
         osc.start(c.currentTime); osc.stop(c.currentTime + 0.15);
         break;
@@ -771,7 +849,9 @@ function buildLevel() {
   ground(336, 379);
   stairUp(338, 4);
   stairDown(343, 4);
-  stairUp(350, 9);
+
+  // Boss arena: flat ground 347-358, gate at 359
+  for (let y = 6; y <= 12; y++) map[y][359] = 5;  // gate wall
 
   // === ADDITIONAL FEATURES FOR DIVERSITY ===
 
@@ -811,8 +891,8 @@ function buildLevel() {
   map[7][318] = 2; map[7][319] = 3;
   addPipe(330, 2);
 
-  // Section 8: Coins before finish
-  map[9][345] = 3; map[7][355] = 3;
+  // Section 8: Pre-boss area
+  map[9][345] = 3;
 
   return map;
 }
@@ -837,7 +917,7 @@ const JUMP_BUFFER_FRAMES = 6;
 
 const FLAGPOLE_X = 361;
 const CASTLE_X = 366;
-const CHECKPOINT_X = 190;
+const CHECKPOINT_XS = [120, 240];
 
 // ================================================================
 // GAME STATE
@@ -875,7 +955,7 @@ window.addEventListener('keydown', e => {
 
   if (e.code === 'Enter' && gameState === 'win' && !multiplayerMode) {
     lives = 3;
-    checkpointReached = false;
+    checkpointIndex = -1;
     resetLevel();
     gameState = 'playing';
   }
@@ -932,14 +1012,18 @@ let emptyBlocks = new Set();
 let dustParticles = [];
 let eliminated = false;
 let racePlayers = [];
-let checkpointReached = false;
+let checkpointIndex = -1;
 let mapCoins = [];
 let enemiesKilled = 0;
 let flagBonus = 0;
 let timeBonus = 0;
+let boss = null;
+let bossFireballs = [];
+const BOSS_ARENA_LEFT = 347;
+const BOSS_GATE_X = 359;
 
 function resetMario() {
-  const spawnX = checkpointReached ? CHECKPOINT_X * TILE : 40;
+  const spawnX = checkpointIndex >= 0 ? CHECKPOINT_XS[checkpointIndex] * TILE : 40;
   mario = {
     x: spawnX, y: 12 * TILE,
     vx: 0, vy: 0,
@@ -950,7 +1034,7 @@ function resetMario() {
     frameTimer: 0,
     big: false,
     dead: false,
-    invincible: 0,
+    invincible: checkpointIndex >= 0 ? 300 : 0,
     coyoteTimer: 0,
     wasOnGround: false,
     skidding: false,
@@ -960,7 +1044,7 @@ function resetMario() {
 
 function resetLevel() {
   levelMap = buildLevel();
-  camera.x = checkpointReached ? CHECKPOINT_X * TILE - VIEW_W / 2 : 0;
+  camera.x = checkpointIndex >= 0 ? CHECKPOINT_XS[checkpointIndex] * TILE - VIEW_W / 2 : 0;
   if (camera.x < 0) camera.x = 0;
   camera.rx = camera.x;
   camera.targetX = camera.x;
@@ -991,9 +1075,12 @@ function resetLevel() {
   emptyBlocks = new Set();
   jumpBufferTimer = 0;
   jumpPressed = false;
+  boss = null;
+  bossFireballs = [];
   resetMario();
   spawnEnemies();
   spawnMapCoins();
+  spawnBoss();
 }
 
 function spawnEnemies() {
@@ -1005,7 +1092,7 @@ function spawnEnemies() {
     195, 197, 215, 217, 222, 224, 228, 230, 234, 238, 240, 244, 250, 252,
     268, 277, 286, 295,
     308, 312, 316, 318, 324, 328, 330, 332,
-    340, 342, 345, 348, 355,
+    340, 342, 345,
   ];
   goombaXs.forEach(x => {
     let gy = 12 * TILE;
@@ -1014,7 +1101,7 @@ function spawnEnemies() {
     entities.push(createGoomba(x * TILE, gy));
   });
 
-  [75, 125, 160, 235, 248, 300, 325, 337].forEach(x => {
+  [28, 45, 75, 90, 125, 142, 160, 192, 220, 235, 248, 275, 300, 318, 325, 337].forEach(x => {
     entities.push(createKoopa(x * TILE, 12 * TILE));
   });
 
@@ -1049,11 +1136,26 @@ function spawnMapCoins() {
     [314, 11], [315, 11],
     [326, 7], [327, 7],
     [341, 11], [343, 11], [345, 11],
-    [352, 5], [353, 4], [354, 3],
   ];
   coinPositions.forEach(([tx, ty]) => {
+    if (levelMap[ty] && levelMap[ty][tx]) ty--;
     mapCoins.push({ x: tx * TILE + 4, y: ty * TILE, collected: false });
   });
+}
+
+function spawnBoss() {
+  boss = {
+    x: 354 * TILE, y: 10 * TILE,
+    vx: -0.5, vy: 0,
+    w: 28, h: 32,
+    hp: 3, alive: true, dying: false, deathTimer: 0,
+    jumpTimer: 0, fireTimer: 0,
+    frame: 0, frameTimer: 0,
+    invincible: 0,
+    arenaLeft: BOSS_ARENA_LEFT * TILE,
+    arenaRight: (BOSS_GATE_X - 1) * TILE,
+    onGround: false,
+  };
 }
 
 function createGoomba(x, y) {
@@ -1094,7 +1196,7 @@ function addScorePopup(x, y, pts) {
   scorePopups.push({ x, y, text: String(pts), life: 50, vy: -0.8 });
 }
 
-const ENEMY_POINTS = { goomba: 100, koopa: 200, buzzy: 300, piranha: 400 };
+const ENEMY_POINTS = { goomba: 100, koopa: 200, buzzy: 300, piranha: 400, boss: 5000 };
 
 // ================================================================
 // COLLISION
@@ -1196,8 +1298,9 @@ function updateMario() {
         if (multiplayerMode) {
           eliminated = true;
           writePlayerDied();
+          checkpointIndex = -1;
         } else {
-          checkpointReached = false;
+          checkpointIndex = -1;
           gameState = 'gameover';
         }
       } else {
@@ -1414,10 +1517,12 @@ function updateMario() {
     }
   }
 
-  // Checkpoint
-  if (!checkpointReached && mario.x >= CHECKPOINT_X * TILE) {
-    checkpointReached = true;
-    playSound('powerup');
+  // Checkpoints
+  for (let ci = 0; ci < CHECKPOINT_XS.length; ci++) {
+    if (ci > checkpointIndex && mario.x >= CHECKPOINT_XS[ci] * TILE) {
+      checkpointIndex = ci;
+      playSound('powerup');
+    }
   }
 
   // Map coin collection
@@ -1617,7 +1722,148 @@ function updateEntities() {
     });
   });
 
+  // Shell vs boss
+  if (boss && boss.alive && boss.invincible <= 0) {
+    entities.forEach(shell => {
+      if (shell.type !== 'koopa' || !shell.shell || !shell.shellMoving || !shell.alive) return;
+      if (shell.x < boss.x + boss.w && shell.x + shell.w > boss.x &&
+          shell.y < boss.y + boss.h && shell.y + shell.h > boss.y) {
+        boss.hp--;
+        boss.invincible = 40;
+        shell.alive = false;
+        shell.remove = true;
+        if (boss.hp <= 0) {
+          boss.alive = false;
+          boss.dying = true;
+          boss.vy = -5;
+          boss.deathTimer = 0;
+          score += ENEMY_POINTS.boss;
+          addScorePopup(boss.x, boss.y - 16, ENEMY_POINTS.boss);
+          enemiesKilled++;
+          playSound('bossdie');
+          for (let gy = 6; gy <= 12; gy++) levelMap[gy][BOSS_GATE_X] = 0;
+        } else {
+          playSound('bosshit');
+          addScorePopup(boss.x, boss.y - 8, 500);
+          score += 500;
+        }
+      }
+    });
+  }
+
   entities = entities.filter(e => !e.remove);
+}
+
+// ================================================================
+// UPDATE: BOSS
+// ================================================================
+function updateBoss() {
+  // Update fireballs regardless of boss state
+  bossFireballs = bossFireballs.filter(f => {
+    f.x += f.vx;
+    f.vy += 0.08;
+    f.y += f.vy;
+    const fc = tileCollision(f.x, f.y, 8, 8);
+    if (fc && f.vy > 0) { f.y = fc.ty * TILE - 8; f.vy = -3; }
+    f.life--;
+    if (f.life <= 0 || f.x < camera.x - 32 || f.x > camera.x + VIEW_W + 32) return false;
+    if (!mario.dead && mario.invincible <= 0) {
+      const mh = mario.big ? 24 : 16;
+      if (mario.x + mario.w > f.x && mario.x < f.x + 8 &&
+          mario.y + mh > f.y && mario.y < f.y + 8) {
+        mariodie();
+      }
+    }
+    return true;
+  });
+
+  if (!boss) return;
+
+  if (boss.dying) {
+    boss.deathTimer++;
+    boss.vy += GRAVITY_DOWN;
+    boss.y += boss.vy;
+    if (boss.deathTimer > 120) boss = null;
+    return;
+  }
+
+  if (!boss.alive) return;
+
+  if (boss.invincible > 0) boss.invincible--;
+
+  // Gravity
+  boss.vy += GRAVITY_DOWN;
+  if (boss.vy > MAX_FALL) boss.vy = MAX_FALL;
+
+  // Horizontal movement
+  boss.x += boss.vx;
+  if (boss.x <= boss.arenaLeft) { boss.x = boss.arenaLeft; boss.vx = Math.abs(boss.vx); }
+  if (boss.x + boss.w >= boss.arenaRight) { boss.x = boss.arenaRight - boss.w; boss.vx = -Math.abs(boss.vx); }
+
+  // Vertical
+  boss.y += boss.vy;
+  boss.onGround = false;
+  const bc = tileCollision(boss.x + 2, boss.y, boss.w - 4, boss.h);
+  if (bc) {
+    if (boss.vy > 0) { boss.y = bc.ty * TILE - boss.h; boss.vy = 0; boss.onGround = true; }
+    else { boss.y = (bc.ty + 1) * TILE; boss.vy = 0; }
+  }
+
+  // Jump
+  boss.jumpTimer++;
+  if (boss.jumpTimer > 90 + Math.random() * 60 && boss.onGround) {
+    boss.vy = -6.5;
+    boss.jumpTimer = 0;
+  }
+
+  // Throw fireballs toward Mario
+  boss.fireTimer++;
+  if (boss.fireTimer > 80 + Math.random() * 40) {
+    boss.fireTimer = 0;
+    const dir = mario.x < boss.x ? -1 : 1;
+    bossFireballs.push({
+      x: boss.x + (dir > 0 ? boss.w : -8),
+      y: boss.y + 10,
+      vx: dir * 2.5,
+      vy: -1.5,
+      life: 200,
+    });
+    playSound('fireball');
+  }
+
+  // Animation
+  boss.frameTimer++;
+  if (boss.frameTimer > 16) { boss.frameTimer = 0; boss.frame = (boss.frame + 1) % 2; }
+
+  // Collision with Mario
+  if (mario.dead || mario.invincible > 0 || flagDescending) return;
+  const mx = mario.x + 2, mw = mario.w - 4;
+  const mh = mario.big ? (mario.crouching ? 16 : 24) : 16;
+  const my = mario.big && mario.crouching ? mario.y + 8 : mario.y;
+  if (mx < boss.x + boss.w && mx + mw > boss.x && my < boss.y + boss.h && my + mh > boss.y) {
+    if (mario.vy > 0 && my + mh - boss.y < 12 && boss.invincible <= 0) {
+      boss.hp--;
+      boss.invincible = 40;
+      mario.vy = -6;
+      if (boss.hp <= 0) {
+        boss.alive = false;
+        boss.dying = true;
+        boss.vy = -5;
+        boss.deathTimer = 0;
+        score += ENEMY_POINTS.boss;
+        addScorePopup(boss.x, boss.y - 16, ENEMY_POINTS.boss);
+        enemiesKilled++;
+        playSound('bossdie');
+        for (let gy = 6; gy <= 12; gy++) levelMap[gy][BOSS_GATE_X] = 0;
+      } else {
+        playSound('bosshit');
+        addScorePopup(boss.x, boss.y - 8, 500);
+        score += 500;
+      }
+    } else if (boss.invincible <= 0) {
+      mariodie();
+    }
+  }
 }
 
 // ================================================================
@@ -1723,6 +1969,7 @@ function update() {
   if (eliminated) return;
   updateMario();
   updateEntities();
+  updateBoss();
   updateItems();
   updateParticles();
 }
@@ -1903,7 +2150,10 @@ function drawBackground() {
 }
 
 function drawMario() {
-  if (mario.invincible > 0 && Math.floor(mario.invincible / 3) % 2 === 0) return;
+  if (mario.invincible > 0) {
+    const blinkRate = mario.invincible > 120 ? 8 : 3;
+    if (Math.floor(mario.invincible / blinkRate) % 3 === 0) return;
+  }
 
   const sx = Math.floor(mario.x - camera.rx);
   const sy = Math.floor(mario.y);
@@ -2022,6 +2272,54 @@ function drawParticles() {
   });
 }
 
+function drawBoss() {
+  if (!boss) return;
+  const sx = Math.floor(boss.x - camera.rx);
+  if (sx < -48 || sx > VIEW_W + 48) return;
+  const sy = Math.floor(boss.y);
+
+  if (boss.dying) {
+    drawPixels(bx, sx - 2, sy, BOWSER_SPRITE, BOWSER_PALETTE, true);
+    return;
+  }
+
+  if (boss.invincible > 0 && (boss.invincible & 2)) return;
+
+  drawPixels(bx, sx - 2, sy, BOWSER_SPRITE, BOWSER_PALETTE, boss.vx > 0);
+
+  // HP bar above boss
+  const barW = 24;
+  const barY = sy - 6;
+  bx.fillStyle = '#333';
+  bx.fillRect(sx + 2, barY, barW, 3);
+  bx.fillStyle = boss.hp === 1 ? '#ff3030' : boss.hp === 2 ? '#ffaa00' : '#00e000';
+  bx.fillRect(sx + 2, barY, Math.ceil(barW * boss.hp / 3), 3);
+}
+
+function drawBossFireballs() {
+  bossFireballs.forEach(f => {
+    const sx = Math.floor(f.x - camera.rx);
+    if (sx < -16 || sx > VIEW_W + 16) return;
+    drawPixels(bx, sx, Math.floor(f.y), FIREBALL_SPRITE, FIREBALL_PALETTE, f.vx < 0);
+  });
+}
+
+function drawBossGate() {
+  if (!boss || !boss.alive) return;
+  const gx = Math.floor(BOSS_GATE_X * TILE - camera.rx);
+  if (gx < -TILE || gx > VIEW_W + TILE) return;
+  for (let row = 6; row <= 12; row++) {
+    const gy = row * TILE;
+    bx.fillStyle = '#8b4513';
+    bx.fillRect(gx, gy, TILE, TILE);
+    bx.fillStyle = '#a0522d';
+    bx.fillRect(gx + 2, gy + 2, TILE - 4, TILE - 4);
+    bx.fillStyle = '#6b3410';
+    bx.fillRect(gx, gy, TILE, 1);
+    bx.fillRect(gx, gy, 1, TILE);
+  }
+}
+
 function drawMapCoins() {
   mapCoins.forEach(c => {
     if (c.collected) return;
@@ -2039,28 +2337,33 @@ function drawMapCoins() {
 }
 
 function drawCheckpoint() {
-  const fx = Math.floor(CHECKPOINT_X * TILE - camera.rx);
-  if (fx < -20 || fx > VIEW_W + 20) return;
+  CHECKPOINT_XS.forEach((cpx, ci) => {
+    const fx = Math.floor(cpx * TILE - camera.rx);
+    if (fx < -20 || fx > VIEW_W + 20) return;
 
-  bx.fillStyle = '#888';
-  bx.fillRect(fx + 7, 6 * TILE, 2, 7 * TILE);
+    const poleTop = 11 * TILE;
+    const poleH = 2 * TILE;
 
-  bx.fillStyle = '#ddd';
-  bx.fillRect(fx + 7, 6 * TILE - 2, 3, 3);
+    bx.fillStyle = '#888';
+    bx.fillRect(fx + 7, poleTop, 1, poleH);
 
-  if (checkpointReached) {
-    const pulse = Math.sin(globalTick * 0.12) * 0.3 + 0.7;
-    bx.fillStyle = `rgba(0, 200, 0, ${pulse})`;
-    bx.fillRect(fx - 4, 6 * TILE + 2, 10, 7);
-    bx.fillStyle = '#80ff80';
-    bx.fillRect(fx - 2, 6 * TILE + 4, 4, 3);
-  } else {
-    const wave = Math.floor(Math.sin(globalTick * 0.06) * 1);
-    bx.fillStyle = '#fc7460';
-    bx.fillRect(fx - 4 + wave, 6 * TILE + 2, 10, 7);
-    bx.fillStyle = '#fcb0a0';
-    bx.fillRect(fx - 2 + wave, 6 * TILE + 4, 4, 3);
-  }
+    bx.fillStyle = '#ddd';
+    bx.fillRect(fx + 7, poleTop - 1, 2, 2);
+
+    if (ci <= checkpointIndex) {
+      const pulse = Math.sin(globalTick * 0.12) * 0.3 + 0.7;
+      bx.fillStyle = `rgba(0, 200, 0, ${pulse})`;
+      bx.fillRect(fx + 1, poleTop + 1, 6, 5);
+      bx.fillStyle = '#80ff80';
+      bx.fillRect(fx + 2, poleTop + 2, 3, 3);
+    } else {
+      const wave = Math.floor(Math.sin(globalTick * 0.06) * 1);
+      bx.fillStyle = '#fc7460';
+      bx.fillRect(fx + 1 + wave, poleTop + 1, 6, 5);
+      bx.fillStyle = '#fcb0a0';
+      bx.fillRect(fx + 2 + wave, poleTop + 2, 3, 3);
+    }
+  });
 }
 
 function drawFlagPole() {
@@ -2181,7 +2484,7 @@ function drawHUD() {
   bx.fillRect(72, 18, 6, 7);
   drawPixelText(bx, 'x' + String(coins).padStart(2, '0'), 82, 18, COL.text, sh);
 
-  const livesStr = 'x' + lives;
+  const livesStr = 'x' + (lives - 1);
   const livesColor = lives <= 1 ? '#e44030' : COL.text;
   drawPixelText(bx, 'LIVES', 108, 8, COL.text, sh);
   drawPixelText(bx, livesStr, 116, 18, livesColor, sh);
@@ -2242,7 +2545,7 @@ function render() {
     const wW = wText.length * 6;
     drawPixelText(bx, wText, ((VIEW_W - wW) / 2) | 0, (VIEW_H / 2 - 24) | 0, '#fff', null);
     drawPixels(bx, (VIEW_W / 2 - 16) | 0, (VIEW_H / 2 - 4) | 0, MARIO_STAND, MARIO_PALETTE, false);
-    drawPixelText(bx, 'x  ' + lives, (VIEW_W / 2 + 6) | 0, (VIEW_H / 2) | 0, '#fff', null);
+    drawPixelText(bx, 'x  ' + (lives - 1), (VIEW_W / 2 + 6) | 0, (VIEW_H / 2) | 0, '#fff', null);
     ctx.drawImage(buf, 0, 0, VIEW_W, VIEW_H, 0, 0, canvas.width, canvas.height);
     return;
   }
@@ -2255,21 +2558,32 @@ function render() {
   drawFlagPole();
   drawCastle();
   drawMapCoins();
+  drawBossGate();
   drawItems();
   drawEntities();
+  drawBoss();
+  drawBossFireballs();
   drawParticles();
   drawMario();
   drawHUD();
 
   if (eliminated && multiplayerMode) {
-    bx.fillStyle = 'rgba(0,0,0,0.55)';
-    bx.fillRect(0, VIEW_H / 2 - 28, VIEW_W, 56);
-    const elText = 'ELIMINATED';
+    bx.fillStyle = 'rgba(0,0,0,0.7)';
+    bx.fillRect(0, VIEW_H / 2 - 48, VIEW_W, 96);
+
+    const elText = 'OUT OF LIVES';
     const elW = elText.length * 6;
-    drawPixelText(bx, elText, Math.round((VIEW_W - elW) / 2), VIEW_H / 2 - 12, '#e44030', '#000');
-    const waitText = 'WAITING FOR MATCH...';
+    drawPixelText(bx, elText, Math.round((VIEW_W - elW) / 2), VIEW_H / 2 - 40, '#e44030', '#000');
+
+    drawPixelText(bx, 'YOUR SCORE', 32, VIEW_H / 2 - 24, '#f8d830', '#000');
+    drawPixelText(bx, 'COINS: ' + coins, 32, VIEW_H / 2 - 12, '#fff', '#000');
+    drawPixelText(bx, 'ENEMIES: ' + enemiesKilled, 32, VIEW_H / 2 - 2, '#fff', '#000');
+    const totalText = 'TOTAL: ' + score;
+    drawPixelText(bx, totalText, 32, VIEW_H / 2 + 12, '#f8d830', '#000');
+
+    const waitText = 'WAITING FOR MATCH TO END...';
     const waitW = waitText.length * 6;
-    drawPixelText(bx, waitText, Math.round((VIEW_W - waitW) / 2), VIEW_H / 2 + 6, '#aaa', '#000');
+    drawPixelText(bx, waitText, Math.round((VIEW_W - waitW) / 2), VIEW_H / 2 + 30, '#aaa', '#000');
   }
 
   if (gameState === 'win' && !multiplayerMode) {
@@ -2477,7 +2791,7 @@ function subscribeToRoom(code) {
           hideMenu();
           resumeGame();
           gameState = 'playing';
-          checkpointReached = false;
+          checkpointIndex = -1;
           resetLevel();
           roomStartTime = data.startTime;
           roomMatchDuration = data.matchDuration || MATCH_DURATION;
@@ -2534,6 +2848,9 @@ function writePlayerDied() {
   if (!roomRef) return;
   var updates = {};
   updates['players.' + myPlayerId + '.alive'] = false;
+  updates['players.' + myPlayerId + '.coins'] = coins;
+  updates['players.' + myPlayerId + '.gameScore'] = score;
+  updates['players.' + myPlayerId + '.progress'] = Math.min(1, mario.x / ((LEVEL_WIDTH - 15) * TILE));
   roomRef.update(updates).catch(function() {});
 }
 
@@ -2617,7 +2934,7 @@ function showResults(rankings) {
     const col = playerColors[i % playerColors.length];
     let timeStr = '';
     if (p.finished) timeStr = `${(p.finishTime / 1000).toFixed(2)}s`;
-    else if (!p.alive) timeStr = 'ELIMINATED';
+    else if (!p.alive) timeStr = 'OUT OF LIVES';
     else timeStr = `${Math.round((p.progress || 0) * 100)}%`;
     const finalScore = p.finalScore || 0;
     const coinStr = p.coins ? ` Coins:${p.coins}` : '';
@@ -2706,7 +3023,7 @@ function startSinglePlayer() {
   hideMenu();
   gameState = 'playing';
   lives = 3;
-  checkpointReached = false;
+  checkpointIndex = -1;
   resetLevel();
 }
 
