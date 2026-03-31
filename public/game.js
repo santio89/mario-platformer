@@ -709,7 +709,7 @@ function playSound(type) {
 // ================================================================
 // LEVEL BUILDER
 // ================================================================
-const LEVEL_WIDTH = 380;
+const LEVEL_WIDTH = 395;
 const LEVEL_HEIGHT = 15;
 
 function buildLevel() {
@@ -845,13 +845,16 @@ function buildLevel() {
   map[9][327] = 2;
   map[5][326] = 2;
 
-  // === SECTION 8: GRAND FINALE (335-379) ===
-  ground(336, 379);
+  // === SECTION 8: GRAND FINALE (335-394) ===
+  ground(336, 394);
   stairUp(338, 4);
   stairDown(343, 4);
 
   // Boss arena: flat ground 347-358, gate at 359
   for (let y = 6; y <= 12; y++) map[y][359] = 5;  // gate wall
+
+  // Victory staircase after boss (classic Mario ending)
+  stairUp(367, 8);
 
   // === ADDITIONAL FEATURES FOR DIVERSITY ===
 
@@ -891,6 +894,10 @@ function buildLevel() {
   map[7][318] = 2; map[7][319] = 3;
   addPipe(330, 2);
 
+  // 1-UP blocks (hidden among regular blocks)
+  map[5][107] = 6;
+  map[5][319] = 6;
+
   // Section 8: Pre-boss area
   map[9][345] = 3;
 
@@ -915,8 +922,8 @@ const SKID_DECEL = 0.22;
 const COYOTE_FRAMES = 6;
 const JUMP_BUFFER_FRAMES = 6;
 
-const FLAGPOLE_X = 361;
-const CASTLE_X = 366;
+const FLAGPOLE_X = 376;
+const CASTLE_X = 381;
 const CHECKPOINT_XS = [120, 240];
 
 // ================================================================
@@ -1230,7 +1237,7 @@ function hitBlock(tx, ty) {
   const key = `${tx},${ty}`;
   const tile = getTile(tx, ty);
 
-  if (tile === 3 || tile === 4) {
+  if (tile === 3 || tile === 4 || tile === 6) {
     if (emptyBlocks.has(key)) {
       playSound('bump');
       return;
@@ -1242,6 +1249,10 @@ function hitBlock(tx, ty) {
       coinAnims.push({ x: tx * TILE + 4, y: ty * TILE - 16, vy: -3.5, life: 35 });
       addScorePopup(tx * TILE, ty * TILE - 16, 200);
       playSound('coin');
+    } else if (tile === 6) {
+      lives++;
+      addScorePopup(tx * TILE, ty * TILE - 16, '1UP');
+      playSound('powerup');
     } else {
       items.push({
         type: 'mushroom',
@@ -2011,7 +2022,7 @@ function drawTile(x, y, tile) {
       bx.fillRect(sx, y + 15, TILE, 1);
       break;
 
-    case 3: case 4:
+    case 3: case 4: case 6: {
       if (emptyBlocks.has(key)) {
         bx.fillStyle = COL.blockShade;
         bx.fillRect(sx, y, TILE, TILE);
@@ -2021,22 +2032,22 @@ function drawTile(x, y, tile) {
         bx.fillRect(sx + 2, y + 2, TILE - 4, TILE - 4);
         break;
       }
-      // Animated glow
       const glow = Math.sin(globalTick * 0.08) * 0.3 + 0.7;
-      bx.fillStyle = COL.block;
+      const is1up = tile === 6;
+      bx.fillStyle = is1up ? '#30b830' : COL.block;
       bx.fillRect(sx, y, TILE, TILE);
-      bx.fillStyle = COL.blockShade;
+      bx.fillStyle = is1up ? '#208020' : COL.blockShade;
       bx.fillRect(sx, y + TILE - 2, TILE, 2);
       bx.fillRect(sx + TILE - 2, y, 2, TILE);
       bx.fillStyle = `rgba(255,255,255,${glow * 0.15})`;
       bx.fillRect(sx + 1, y + 1, TILE - 3, TILE - 3);
-      // ? mark
-      bx.fillStyle = COL.blockDark;
+      bx.fillStyle = is1up ? '#105010' : COL.blockDark;
       bx.fillRect(sx + 5, y + 3, 6, 2);
       bx.fillRect(sx + 9, y + 5, 2, 3);
       bx.fillRect(sx + 7, y + 7, 2, 2);
       bx.fillRect(sx + 7, y + 11, 2, 2);
       break;
+    }
 
     case 5:
       bx.fillStyle = COL.hardBlockDark;
