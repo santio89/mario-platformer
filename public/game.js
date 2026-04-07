@@ -1619,7 +1619,7 @@ function updateMario() {
     if (timeTimer >= 36) {
       timeTimer = 0;
       time--;
-      if (time <= 100 && time > 0 && time % 2 === 0) playSound('warning');
+      if (time <= 30 && time > 0 && time % 2 === 0) playSound('warning');
       if (time <= 0) mariodie();
     }
   }
@@ -1669,6 +1669,7 @@ function mariodie() {
   if (mario.invincible > 0) return;
   if (mario.fire) {
     mario.fire = false;
+    marioFireballs = [];
     mario.invincible = 120;
     playSound('shrink');
     return;
@@ -1707,10 +1708,11 @@ function updateEntities() {
       e.frameTimer++;
       if (e.frameTimer > 12) { e.frameTimer = 0; e.frame = (e.frame + 1) % 2; }
 
-      // Don't emerge if Mario is near the pipe
-      const nearPipe = Math.abs(mario.x - e.pipeX * TILE) < 32;
-      if (nearPipe && e.emergeOffset >= 0) {
-        // stay hidden
+      // Only suppress if Mario is directly on top of the pipe (standing on it)
+      const onPipe = Math.abs((mario.x + mario.w / 2) - (e.pipeX * TILE + TILE)) < 14
+                     && mario.y + (mario.big ? 24 : 16) <= e.baseY + 4 && mario.onGround;
+      if (onPipe && e.emergeOffset >= 0) {
+        // stay hidden only when Mario stands on the pipe
       } else if (e.waitTimer > 0) {
         e.waitTimer--;
         if (e.waitTimer <= 0) {
@@ -2112,7 +2114,8 @@ function updateMarioFireballs() {
     const tx = Math.floor((fb.x + 4) / TILE);
     const ty = Math.floor((fb.y + 8) / TILE);
     const tile = getTile(tx, ty);
-    if (tile && tile !== 10) {
+    const isPipeBody = (tile === 10 || tile === 11);
+    if (tile && !isPipeBody) {
       fb.y = (ty - 1) * TILE;
       fb.vy = -3.5;
       fb.bounces++;
@@ -2124,7 +2127,7 @@ function updateMarioFireballs() {
     const wallTy = Math.floor((fb.y + 4) / TILE);
     const wallR = getTile(wallTxR, wallTy);
     const wallL = getTile(wallTxL, wallTy);
-    if ((wallR && wallR !== 10 && fb.vx > 0) || (wallL && wallL !== 10 && fb.vx < 0)) {
+    if ((wallR && wallR !== 10 && wallR !== 11 && fb.vx > 0) || (wallL && wallL !== 10 && wallL !== 11 && fb.vx < 0)) {
       fb.remove = true;
       return;
     }
@@ -2453,9 +2456,17 @@ function drawBackground() {
   ];
   for (let base = -CYCLE; base < totalLen + CYCLE; base += CYCLE) {
     for (const bp of bushPositions) {
-      const sx = Math.floor((base + bp.tx * T) - camera.rx);
+      const worldX = base + bp.tx * T;
+      const tileX = Math.floor(worldX / T);
       const spacing = bushR * 1.5;
       const totalW = (bp.bumps - 1) * spacing + bushR * 2;
+      const bushTileSpan = Math.ceil(totalW / T) + 1;
+      let bushOk = true;
+      for (let bt = 0; bt < bushTileSpan; bt++) {
+        if (!hasGround(tileX + bt) || hasObstacle(tileX + bt)) { bushOk = false; break; }
+      }
+      if (!bushOk) continue;
+      const sx = Math.floor(worldX - camera.rx);
       if (sx + totalW < -40 || sx > VIEW_W + 40) continue;
       bx.fillStyle = bushDark;
       for (let i = 0; i < bp.bumps; i++) {
@@ -2482,15 +2493,31 @@ function drawBackground() {
     }
   }
 
-  // --- TREES (scattered, not too many) ---
+  // --- TREES (scattered, not too many) --- check ground exists ---
   const treePositions = [
     { tx: 6, s: 1.1 },
     { tx: 17, s: 0.8 },
     { tx: 35, s: 1.0 },
   ];
+  function hasGround(tileX) {
+    if (tileX < 0 || tileX >= LEVEL_WIDTH) return false;
+    return levelMap && levelMap[13] && levelMap[13][tileX] === 1;
+  }
+  function hasObstacle(tileX) {
+    if (tileX < 0 || tileX >= LEVEL_WIDTH) return false;
+    if (!levelMap) return false;
+    for (let row = 8; row <= 12; row++) {
+      const t = levelMap[row] && levelMap[row][tileX];
+      if (t && t !== 0) return true;
+    }
+    return false;
+  }
   for (let base = 0; base < totalLen + CYCLE; base += CYCLE) {
     for (const tp of treePositions) {
-      const sx = Math.floor((base + tp.tx * T) - camera.rx);
+      const worldX = base + tp.tx * T;
+      const tileX = Math.floor(worldX / T);
+      if (!hasGround(tileX) || hasObstacle(tileX)) continue;
+      const sx = Math.floor(worldX - camera.rx);
       if (sx < -30 || sx > VIEW_W + 30) continue;
       const s = tp.s;
       const trunkW = Math.floor(4 * s);
@@ -2512,11 +2539,19 @@ function drawBackground() {
     }
   }
 
-  // --- FENCES (a few per cycle) ---
+  // --- FENCES (a few per cycle) --- check ground exists ---
   const fencePositions = [14, 30, 45];
   for (let base = 0; base < totalLen + CYCLE; base += CYCLE) {
     for (const ftx of fencePositions) {
-      const sx = Math.floor((base + ftx * T) - camera.rx);
+      const worldX = base + ftx * T;
+      const tileX = Math.floor(worldX / T);
+      const fenceTiles = 4;
+      let allGround = true;
+      for (let ft = 0; ft < fenceTiles; ft++) {
+        if (!hasGround(tileX + ft) || hasObstacle(tileX + ft)) { allGround = false; break; }
+      }
+      if (!allGround) continue;
+      const sx = Math.floor(worldX - camera.rx);
       if (sx < -40 || sx > VIEW_W + 40) continue;
       for (let p = 0; p < 4; p++) {
         const px = sx + p * 8;
@@ -2742,7 +2777,18 @@ function drawMarioFireballs() {
   marioFireballs.forEach(fb => {
     const sx = Math.floor(fb.x - camera.rx);
     if (sx < -16 || sx > VIEW_W + 16) return;
-    drawPixels(bx, sx, Math.floor(fb.y), FIREBALL_SPRITE, MARIO_FB_PALETTE, fb.vx < 0);
+    const spinFrame = Math.floor(Date.now() / 50) % 4;
+    const flipH = spinFrame === 1 || spinFrame === 2;
+    const flipV = spinFrame >= 2;
+    if (flipV) {
+      bx.save();
+      bx.translate(sx, Math.floor(fb.y) + 8);
+      bx.scale(1, -1);
+      drawPixels(bx, 0, 0, FIREBALL_SPRITE, MARIO_FB_PALETTE, flipH);
+      bx.restore();
+    } else {
+      drawPixels(bx, sx, Math.floor(fb.y), FIREBALL_SPRITE, MARIO_FB_PALETTE, flipH);
+    }
   });
 }
 
@@ -2943,7 +2989,7 @@ function drawHUD() {
     drawPixelText(bx, timeStr, 208, 18, tColor, sh);
   } else {
     drawPixelText(bx, 'TIME', 210, 8, COL.text, sh);
-    const tColor = time <= 100 && time % 2 === 0 ? '#e44030' : COL.text;
+    const tColor = time <= 30 && time % 2 === 0 ? '#e44030' : COL.text;
     drawPixelText(bx, String(Math.max(0, time)).padStart(3, '0'), 214, 18, tColor, sh);
   }
 

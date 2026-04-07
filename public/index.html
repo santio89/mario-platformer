@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Super Mario Bros - Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -47,38 +48,40 @@
   }
 
   .menu-title {
-    font-size: 30px;
-    color: #f8d830;
-    text-shadow: 2px 2px 0 #804800;
-    margin-bottom: 4px;
-    letter-spacing: 4px;
-    font-weight: bold;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 22px;
+    color: #f0c838;
+    text-shadow: 2px 2px 0 #a03010, 0 0 12px rgba(240,160,40,0.25);
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+    font-weight: normal;
   }
   .menu-subtitle {
-    font-size: 12px;
-    color: #fc9838;
-    margin-bottom: 32px;
-    letter-spacing: 2px;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 8px;
+    color: #e08040;
+    margin-bottom: 28px;
+    letter-spacing: 3px;
     text-shadow: 1px 1px 0 #000;
   }
   .menu-btn {
-    background: rgba(0,0,0,0.4);
-    border: 2px solid #f8d830;
-    color: #f8d830;
-    padding: 12px 28px;
-    font-size: 14px;
-    font-family: 'Courier New', monospace;
+    background: rgba(0,0,0,0.35);
+    border: 2px solid #c85020;
+    color: #f0c838;
+    padding: 12px 24px;
+    font-size: 10px;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
     cursor: pointer;
     margin: 6px;
-    min-width: 240px;
+    min-width: 220px;
     text-align: center;
     transition: all 0.12s;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     text-shadow: 1px 1px 0 #000;
   }
   .menu-btn:hover, .menu-btn:focus {
-    background: #e44030;
-    border-color: #e44030;
+    background: #c84c0c;
+    border-color: #f0c838;
     color: #fff;
     transform: scale(1.04);
     outline: none;
@@ -86,49 +89,52 @@
   }
   .menu-input {
     background: rgba(0,0,0,0.5);
-    border: 2px solid #886820;
-    color: #f8d830;
-    padding: 11px 18px;
-    font-size: 16px;
-    font-family: 'Courier New', monospace;
+    border: 2px solid #905030;
+    color: #f0c838;
+    padding: 10px 14px;
+    font-size: 10px;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
     text-align: center;
     margin: 7px;
     width: 240px;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
     text-transform: uppercase;
   }
-  .menu-input:focus { outline: none; border-color: #f8d830; }
-  .menu-input::placeholder { color: #6c5820; letter-spacing: 1px; text-transform: none; }
-  .menu-label { color: #b09860; font-size: 11px; margin-top: 14px; margin-bottom: 3px; letter-spacing: 1px; }
+  .menu-input:focus { outline: none; border-color: #f0c838; }
+  .menu-input::placeholder { color: #6c4030; font-size: 8px; letter-spacing: 1px; text-transform: none; }
+  .menu-label { color: #c08050; font-size: 7px; font-family: 'Press Start 2P', 'Courier New', monospace; margin-top: 14px; margin-bottom: 5px; letter-spacing: 1px; }
   .room-code {
-    font-size: 34px;
-    color: #f8d830;
-    letter-spacing: 8px;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 20px;
+    color: #f0c838;
+    letter-spacing: 6px;
     margin: 8px 0 18px 0;
-    font-weight: bold;
-    text-shadow: 2px 2px 0 #000;
+    font-weight: normal;
+    text-shadow: 2px 2px 0 #a03010;
   }
   .player-list {
     color: #8cc63f;
-    font-size: 13px;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 8px;
     margin: 8px 0;
-    line-height: 1.9;
+    line-height: 2.2;
     text-align: left;
     min-width: 240px;
   }
   .player-list div { padding: 2px 0; }
-  .error-msg { color: #e44030; font-size: 12px; margin-top: 6px; min-height: 18px; }
+  .error-msg { color: #e44030; font-family: 'Press Start 2P', 'Courier New', monospace; font-size: 7px; margin-top: 8px; min-height: 18px; }
   .back-link {
-    color: #8c7c5c;
-    font-size: 10px;
+    color: #906050;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 7px;
     cursor: pointer;
     margin-top: 18px;
     text-decoration: none;
     letter-spacing: 1px;
   }
-  .back-link:hover { color: #f8d830; }
+  .back-link:hover { color: #f0c838; }
 
-  .color-picker-label { color: #b09860; font-size: 11px; margin-top: 14px; margin-bottom: 6px; letter-spacing: 1px; }
+  .color-picker-label { color: #c08050; font-family: 'Press Start 2P', 'Courier New', monospace; font-size: 7px; margin-top: 14px; margin-bottom: 6px; letter-spacing: 1px; }
   .color-picker { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 8px; max-width: 280px; }
   .color-swatch {
     width: 30px; height: 30px;
@@ -174,18 +180,20 @@
   }
 
   .pause-title {
-    font-size: 24px;
-    color: #f8d830;
-    text-shadow: 2px 2px 0 #000;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 16px;
+    color: #f0c838;
+    text-shadow: 2px 2px 0 #a03010;
     margin-bottom: 30px;
-    letter-spacing: 4px;
-    font-weight: bold;
+    letter-spacing: 2px;
+    font-weight: normal;
   }
   .controls-hint {
-    color: #8c7c5c;
-    font-size: 9px;
+    color: #7c5c4c;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 6px;
     margin-top: 28px;
-    line-height: 1.9;
+    line-height: 2.2;
     text-align: center;
     letter-spacing: 1px;
   }
@@ -194,13 +202,13 @@
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%,-50%);
-    font-size: 72px;
-    color: #fff;
-    text-shadow: 4px 4px 0 #000;
+    font-size: 48px;
+    color: #f0c838;
+    text-shadow: 3px 3px 0 #a03010;
     z-index: 20;
     display: none;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-weight: normal;
   }
 
   #raceTimeline {
@@ -267,17 +275,17 @@
     top: 8px; left: 8px;
     z-index: 30;
     background: rgba(0,0,0,0.55);
-    border: 1px solid rgba(255,255,255,0.25);
-    color: #aaa;
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #806050;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 6px;
     padding: 4px 8px;
     cursor: pointer;
     border-radius: 3px;
     letter-spacing: 1px;
     transition: color 0.15s, border-color 0.15s;
   }
-  #crtToggle:hover { color: #fff; border-color: #fff; }
+  #crtToggle:hover { color: #f0c838; border-color: #f0c838; }
   #crtToggle.active { color: #8cc63f; border-color: #8cc63f; }
 
   #mobileControls {
@@ -314,10 +322,10 @@
     <div id="menuMain">
       <div class="menu-title">SUPER MARIO BROS</div>
       <div class="menu-subtitle">Online</div>
-      <div style="width:180px;height:2px;background:linear-gradient(90deg,transparent,#f8d830,transparent);margin:0 auto 24px auto;"></div>
-      <button class="menu-btn" onclick="showSinglePlayerSetup()">&#9654; SINGLE PLAYER</button>
-      <button class="menu-btn" onclick="showCreateRoom()">&#9654; CREATE ROOM</button>
-      <button class="menu-btn" onclick="showJoinRoom()">&#9654; JOIN ROOM</button>
+      <div style="width:180px;height:2px;background:linear-gradient(90deg,transparent,#c85020,transparent);margin:0 auto 24px auto;"></div>
+      <button class="menu-btn" onclick="showSinglePlayerSetup()">1 PLAYER</button>
+      <button class="menu-btn" onclick="showCreateRoom()">CREATE ROOM</button>
+      <button class="menu-btn" onclick="showJoinRoom()">JOIN ROOM</button>
       <div class="controls-hint">
         Arrows: Move &nbsp; Space/Up: Jump &nbsp; X/Shift: Run+Fire<br>
         ESC: Pause
