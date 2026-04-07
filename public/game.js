@@ -1013,7 +1013,7 @@ window.addEventListener('keydown', e => {
     jumpBufferTimer = JUMP_BUFFER_FRAMES;
   }
 
-  if (e.code === 'KeyX' && gameState === 'playing' && mario.fire && !mario.dead && !paused) {
+  if ((e.code === 'KeyX' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') && gameState === 'playing' && mario.fire && !mario.dead && !paused) {
     if (fireballCooldown <= 0 && marioFireballs.length < 2) {
       marioFireballs.push({
         x: mario.x + (mario.facing === 1 ? mario.w : -8),
@@ -1052,7 +1052,7 @@ window.addEventListener('keyup', e => {
 });
 
 function setupMobileControls() {
-  const mapping = { mLeft: 'ArrowLeft', mRight: 'ArrowRight', mA: 'Space', mB: 'KeyZ' };
+  const mapping = { mLeft: 'ArrowLeft', mRight: 'ArrowRight', mA: 'Space', mB: 'KeyX' };
   Object.entries(mapping).forEach(([id, key]) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -1444,7 +1444,7 @@ function updateMario() {
   mario.crouching = wantCrouch;
 
   // Horizontal input
-  const running = keys['KeyZ'] || keys['ShiftLeft'] || keys['ShiftRight'];
+  const running = keys['KeyX'] || keys['ShiftLeft'] || keys['ShiftRight'];
   const maxSpeed = running ? MAX_RUN : MAX_WALK;
   const accel = running ? RUN_ACCEL : WALK_ACCEL;
 
@@ -3562,9 +3562,11 @@ function applyCRT(on) {
   if (on) {
     wrapper.classList.add('crt-on');
     btn.classList.add('active');
+    btn.textContent = 'CRT: ON';
   } else {
     wrapper.classList.remove('crt-on');
     btn.classList.remove('active');
+    btn.textContent = 'CRT: OFF';
   }
 }
 
