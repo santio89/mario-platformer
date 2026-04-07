@@ -3554,6 +3554,36 @@ function leaveRoom() {
 }
 
 // ================================================================
+// CRT FILTER
+// ================================================================
+function applyCRT(on) {
+  const wrapper = document.getElementById('gameWrapper');
+  const btn = document.getElementById('crtToggle');
+  if (on) {
+    wrapper.classList.add('crt-on');
+    btn.classList.add('active');
+  } else {
+    wrapper.classList.remove('crt-on');
+    btn.classList.remove('active');
+  }
+}
+
+function toggleCRT() {
+  const wrapper = document.getElementById('gameWrapper');
+  const isOn = wrapper.classList.contains('crt-on');
+  const newState = !isOn;
+  applyCRT(newState);
+  try { localStorage.setItem('mario_crt', newState ? '1' : '0'); } catch(e) {}
+}
+
+(function initCRT() {
+  try {
+    const saved = localStorage.getItem('mario_crt');
+    applyCRT(saved === '1');
+  } catch(e) {}
+})();
+
+// ================================================================
 // INIT
 // ================================================================
 resetLevel();
