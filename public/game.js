@@ -3,15 +3,9 @@
 // ================================================================
 const canvas = document.getElementById('gameCanvas');
 const TILE = 16;
-const SCALE = 3;
 const VIEW_W = 256;
 const VIEW_H = 240;
 const dpr = window.devicePixelRatio || 1;
-const pixelScale = Math.round(SCALE * dpr);
-canvas.width = VIEW_W * pixelScale;
-canvas.height = VIEW_H * pixelScale;
-canvas.style.width = (canvas.width / dpr) + 'px';
-canvas.style.height = (canvas.height / dpr) + 'px';
 const ctx = canvas.getContext('2d', { alpha: false });
 ctx.imageSmoothingEnabled = false;
 
@@ -20,6 +14,34 @@ buf.width = VIEW_W;
 buf.height = VIEW_H;
 const bx = buf.getContext('2d');
 bx.imageSmoothingEnabled = false;
+
+function resizeCanvas() {
+  const wrapper = document.getElementById('gameWrapper');
+  const isMobile = window.innerWidth <= 900 && ('ontouchstart' in window);
+  const reserveBottom = isMobile ? 140 : 0;
+  const maxW = window.innerWidth;
+  const maxH = window.innerHeight - reserveBottom;
+  const aspect = VIEW_W / VIEW_H;
+  let cssW, cssH;
+  if (maxW / maxH > aspect) {
+    cssH = maxH;
+    cssW = Math.floor(cssH * aspect);
+  } else {
+    cssW = maxW;
+    cssH = Math.floor(cssW / aspect);
+  }
+  const pixelScale = Math.max(1, Math.round((cssW / VIEW_W) * dpr));
+  canvas.width = VIEW_W * pixelScale;
+  canvas.height = VIEW_H * pixelScale;
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  ctx.imageSmoothingEnabled = false;
+  wrapper.style.width = cssW + 'px';
+  wrapper.style.height = cssH + 'px';
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 100));
 
 // ================================================================
 // COLORS (NES palette)
@@ -1052,7 +1074,7 @@ window.addEventListener('keyup', e => {
 });
 
 function setupMobileControls() {
-  const mapping = { mLeft: 'ArrowLeft', mRight: 'ArrowRight', mA: 'Space', mB: 'KeyX' };
+  const mapping = { mLeft: 'ArrowLeft', mRight: 'ArrowRight', mDown: 'ArrowDown', mA: 'Space', mB: 'KeyX' };
   Object.entries(mapping).forEach(([id, key]) => {
     const el = document.getElementById(id);
     if (!el) return;

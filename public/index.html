@@ -2,19 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Super Mario Bros - Online</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
+  html, body {
     background: #000;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+  }
+  body {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    font-family: 'Courier New', monospace;
-    overflow: hidden;
+    min-height: 100dvh;
   }
   #gameWrapper {
     position: relative;
@@ -25,6 +32,7 @@
     display: block;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    touch-action: none;
   }
 
   /* OVERLAYS */
@@ -37,6 +45,9 @@
     justify-content: center;
     z-index: 10;
     color: #fff;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px 8px;
   }
   .overlay.hidden { display: none; }
 
@@ -96,7 +107,8 @@
     font-family: 'Press Start 2P', 'Courier New', monospace;
     text-align: center;
     margin: 7px;
-    width: 240px;
+    width: min(240px, 85%);
+    max-width: 85%;
     letter-spacing: 2px;
     text-transform: uppercase;
   }
@@ -119,7 +131,9 @@
     margin: 8px 0;
     line-height: 2.2;
     text-align: left;
-    min-width: 240px;
+    min-width: min(240px, 90%);
+    max-width: 90%;
+    word-break: break-word;
   }
   .player-list div { padding: 2px 0; }
   .error-msg { color: #e44030; font-family: 'Press Start 2P', 'Courier New', monospace; font-size: 7px; margin-top: 8px; min-height: 18px; }
@@ -135,7 +149,7 @@
   .back-link:hover { color: #f0c838; }
 
   .color-picker-label { color: #c08050; font-family: 'Press Start 2P', 'Courier New', monospace; font-size: 7px; margin-top: 14px; margin-bottom: 6px; letter-spacing: 1px; }
-  .color-picker { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 8px; max-width: 280px; }
+  .color-picker { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 8px; max-width: min(280px, 90%); }
   .color-swatch {
     width: 30px; height: 30px;
     border-radius: 4px;
@@ -214,13 +228,15 @@
   #raceTimeline {
     position: absolute;
     top: 0; right: 0;
-    width: 190px;
+    width: min(190px, 40%);
     background: rgba(0,0,0,0.78);
     z-index: 5;
     padding: 7px;
     display: none;
     font-family: 'Courier New', monospace;
     border-bottom-left-radius: 6px;
+    max-height: 60%;
+    overflow-y: auto;
   }
   #raceTimeline.visible { display: block; }
   .timeline-title { color: #f8d830; font-size: 9px; text-align: center; margin-bottom: 5px; letter-spacing: 1px; }
@@ -296,8 +312,39 @@
     z-index: 30;
     pointer-events: none;
   }
-  @media (max-width: 900px) and (hover: none) {
-    #mobileControls { display: flex; justify-content: space-between; padding: 10px 20px; }
+
+  /* Small screens (phones, small tablets) */
+  @media (max-width: 600px) {
+    .menu-title { font-size: 14px; }
+    .menu-subtitle { font-size: 6px; margin-bottom: 16px; }
+    .menu-btn { font-size: 8px; padding: 10px 14px; min-width: 170px; }
+    .menu-input { font-size: 8px; width: 190px; padding: 8px 10px; }
+    .menu-label { font-size: 6px; }
+    .room-code { font-size: 14px; }
+    .player-list { font-size: 6px; min-width: 180px; }
+    .color-swatch { width: 24px; height: 24px; }
+    .color-picker { max-width: 220px; }
+    .controls-hint { font-size: 5px; margin-top: 14px; }
+    .pause-title { font-size: 12px; }
+    .back-link { font-size: 6px; }
+    .error-msg { font-size: 6px; }
+    #countdown { font-size: 32px; }
+    #crtToggle { font-size: 5px; padding: 3px 5px; }
+    #raceTimeline { width: 140px; padding: 5px; }
+    .timeline-title { font-size: 7px; }
+    .timeline-name { font-size: 6px; }
+  }
+
+  /* Medium screens */
+  @media (min-width: 601px) and (max-width: 900px) {
+    .menu-title { font-size: 18px; }
+    .menu-btn { font-size: 9px; padding: 10px 18px; min-width: 200px; }
+    .menu-input { width: 210px; }
+  }
+
+  /* Touch devices: show mobile controls */
+  @media (hover: none), (pointer: coarse) {
+    #mobileControls { display: flex; justify-content: space-between; padding: 10px 20px; align-items: flex-end; }
     .m-btn {
       width: 56px; height: 56px;
       background: rgba(255,255,255,0.18);
@@ -306,9 +353,25 @@
       color: #fff; font-size: 22px;
       display: flex; align-items: center; justify-content: center;
       pointer-events: all; user-select: none; -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
+    .m-btn:active { background: rgba(255,255,255,0.35); }
     .m-dpad { display: flex; gap: 6px; align-items: flex-end; }
     .m-actions { display: flex; gap: 8px; align-items: flex-end; }
+  }
+  @media (hover: none) and (max-width: 500px) {
+    #mobileControls { height: 110px; padding: 8px 12px; }
+    .m-btn { width: 48px; height: 48px; font-size: 18px; }
+  }
+
+  /* Landscape phones */
+  @media (max-height: 440px) and (hover: none) {
+    #mobileControls { height: 90px; padding: 4px 16px; }
+    .m-btn { width: 42px; height: 42px; font-size: 16px; }
+    .overlay { padding: 6px 8px; }
+    .menu-title { font-size: 12px; margin-bottom: 4px; }
+    .menu-subtitle { margin-bottom: 8px; }
+    .menu-btn { padding: 6px 12px; margin: 3px; }
   }
 </style>
 </head>
@@ -377,7 +440,7 @@
 
     <div id="menuResults" style="display:none;">
       <div class="menu-title">MATCH RESULTS</div>
-      <div class="player-list" id="resultsPlayers" style="min-width:300px;"></div>
+      <div class="player-list" id="resultsPlayers" style="min-width:min(300px, 90%);"></div>
       <button class="menu-btn" id="replayBtn" onclick="returnToLobby()" style="display:none;">PLAY AGAIN</button>
       <div class="back-link" onclick="leaveRoom()">&#8592; Leave</div>
     </div>
@@ -401,6 +464,7 @@
 <div id="mobileControls">
   <div class="m-dpad">
     <div class="m-btn" id="mLeft">&#9664;</div>
+    <div class="m-btn" id="mDown">&#9660;</div>
     <div class="m-btn" id="mRight">&#9654;</div>
   </div>
   <div class="m-actions">
