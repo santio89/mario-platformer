@@ -2578,8 +2578,10 @@ function drawMario() {
       { 1: '#fcfcfc', 2: COL.marioSkin, 3: '#00a800', 4: '#ffe000' },
     ];
     pal = starCols[Math.floor(globalTick / 2) % 4];
+  } else if (mario.fire) {
+    pal = buildFirePaletteFromColor(mySelectedColor);
   } else {
-    pal = mario.fire ? FIRE_MARIO_PALETTE : MARIO_PALETTE;
+    pal = buildPaletteFromColor(mySelectedColor);
   }
   drawPixels(bx, sx, sy, sprite, pal, flipped);
 }
@@ -2892,7 +2894,7 @@ function drawProgressBar() {
   bx.fillRect(barX + barW - 5, barY - 1, 4, 3);
 
   racePlayers.forEach((p, i) => {
-    const col = playerColors[i % playerColors.length];
+    const col = getPlayerDisplayColor(p.color || 'red');
     const progress = Math.max(0, Math.min(1, p.progress || 0));
     const px = barX + Math.round(progress * (barW - 4));
     const isMe = p.id === myPlayerId;
@@ -2986,7 +2988,7 @@ function render() {
     const wText = 'WORLD 1-1';
     const wW = wText.length * 6;
     drawPixelText(bx, wText, ((VIEW_W - wW) / 2) | 0, (VIEW_H / 2 - 24) | 0, '#fff', null);
-    drawPixels(bx, (VIEW_W / 2 - 16) | 0, (VIEW_H / 2 - 4) | 0, MARIO_STAND, MARIO_PALETTE, false);
+    drawPixels(bx, (VIEW_W / 2 - 16) | 0, (VIEW_H / 2 - 4) | 0, MARIO_STAND, buildPaletteFromColor(mySelectedColor), false);
     drawPixelText(bx, 'x  ' + (lives - 1), (VIEW_W / 2 + 6) | 0, (VIEW_H / 2) | 0, '#fff', null);
     ctx.drawImage(buf, 0, 0, VIEW_W, VIEW_H, 0, 0, canvas.width, canvas.height);
     return;
@@ -3126,7 +3128,63 @@ let roomStartTime = 0;
 let roomMatchDuration = MATCH_DURATION;
 let matchEnding = false;
 let lastProgressWrite = 0;
-const playerColors = ['#e44030','#6b88ff','#00a800','#f8d830','#fc74b4','#00e8d8','#a040a0','#fcfcfc'];
+let mySelectedColor = 'red';
+
+const MARIO_COLOR_OPTIONS = [
+  { id: 'red',    label: 'Red',    hat: '#e44030', overalls: '#6b88ff', skin: '#fcbcb0', brown: '#ac7c00' },
+  { id: 'green',  label: 'Green',  hat: '#00a800', overalls: '#6b88ff', skin: '#fcbcb0', brown: '#ac7c00' },
+  { id: 'blue',   label: 'Blue',   hat: '#3060f0', overalls: '#e44030', skin: '#fcbcb0', brown: '#ac7c00' },
+  { id: 'yellow', label: 'Yellow', hat: '#f8d830', overalls: '#6040b0', skin: '#fcbcb0', brown: '#ac7c00' },
+  { id: 'purple', label: 'Purple', hat: '#a040a0', overalls: '#f8d830', skin: '#fcbcb0', brown: '#ac7c00' },
+  { id: 'white',  label: 'White',  hat: '#fcfcfc', overalls: '#e44030', skin: '#fcbcb0', brown: '#ac7c00' },
+  { id: 'black',  label: 'Black',  hat: '#303030', overalls: '#e44030', skin: '#fcbcb0', brown: '#555555' },
+  { id: 'orange', label: 'Orange', hat: '#f08020', overalls: '#00a800', skin: '#fcbcb0', brown: '#ac7c00' },
+  { id: 'cyan',   label: 'Cyan',   hat: '#00e8d8', overalls: '#e44030', skin: '#fcbcb0', brown: '#ac7c00' },
+  { id: 'pink',   label: 'Pink',   hat: '#fc74b4', overalls: '#fcfcfc', skin: '#fcbcb0', brown: '#ac7c00' },
+];
+
+function getColorOption(colorId) {
+  return MARIO_COLOR_OPTIONS.find(c => c.id === colorId) || MARIO_COLOR_OPTIONS[0];
+}
+
+function buildPaletteFromColor(colorId) {
+  const c = getColorOption(colorId);
+  return { 1: c.hat, 2: c.skin, 3: c.brown, 4: c.overalls };
+}
+
+function buildFirePaletteFromColor(colorId) {
+  const c = getColorOption(colorId);
+  return { 1: '#fcfcfc', 2: c.skin, 3: c.hat, 4: c.overalls };
+}
+
+function getPlayerDisplayColor(colorId) {
+  const c = getColorOption(colorId);
+  return c.hat;
+}
+
+function renderColorPicker(containerId, takenColors) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const taken = takenColors || [];
+  container.innerHTML = MARIO_COLOR_OPTIONS.map(c => {
+    const isTaken = taken.includes(c.id);
+    const isSelected = c.id === mySelectedColor;
+    let cls = 'color-swatch';
+    if (isSelected) cls += ' selected';
+    if (isTaken) cls += ' taken';
+    return `<div class="${cls}" style="background:${c.hat};" data-color="${c.id}" onclick="selectColor('${containerId}','${c.id}')"></div>`;
+  }).join('');
+}
+
+function selectColor(containerId, colorId) {
+  mySelectedColor = colorId;
+  if (containerId === 'lobbyColorPicker' && roomRef) {
+    var updates = {};
+    updates['players.' + myPlayerId + '.color'] = colorId;
+    roomRef.update(updates).catch(function() {});
+  }
+  renderColorPicker(containerId, []);
+}
 
 function initFirebase() {
   if (db) return;
@@ -3171,7 +3229,7 @@ function endMatch(roomData) {
   const dead = players.filter(function(p) { return !p.finished && !p.alive; }).sort(function(a, b) { return b.progress - a.progress; });
   const rankings = [].concat(finished, alive, dead).map(function(p, i) {
     return {
-      id: p.id, name: p.name, progress: p.progress,
+      id: p.id, name: p.name, color: p.color || 'red', progress: p.progress,
       finished: p.finished, finishTime: p.finishTime,
       alive: p.alive, coins: p.coins, gameScore: p.gameScore,
       rank: i + 1, finalScore: calcScore(p, i),
@@ -3338,16 +3396,20 @@ window.addEventListener('beforeunload', function() {
 
 function updateLobbyPlayers(players) {
   const div = document.getElementById('lobbyPlayers');
-  div.innerHTML = players.map((p, i) =>
-    `<div style="color:${playerColors[i % playerColors.length]}">${i === 0 ? '* ' : '  '}${p.name}${p.id === myPlayerId ? ' (You)' : ''}</div>`
-  ).join('');
+  div.innerHTML = players.map((p, i) => {
+    const col = getPlayerDisplayColor(p.color || 'red');
+    return `<div style="color:${col}">${i === 0 ? '&#9733; ' : '  '}${p.name}${p.id === myPlayerId ? ' (You)' : ''}</div>`;
+  }).join('');
+
+  const takenColors = players.filter(p => p.id !== myPlayerId).map(p => p.color).filter(Boolean);
+  renderColorPicker('lobbyColorPicker', takenColors);
 }
 
 function updateTimeline(players) {
   const div = document.getElementById('timelinePlayers');
   div.innerHTML = players.map((p, i) => {
     const pct = Math.round((p.progress || 0) * 100);
-    const col = playerColors[i % playerColors.length];
+    const col = getPlayerDisplayColor(p.color || 'red');
     let status = '';
     if (p.finished) status = ` ${(p.finishTime / 1000).toFixed(1)}s`;
     else if (!p.alive) status = ' DEAD';
@@ -3375,7 +3437,7 @@ function showResults(rankings) {
   }
   div.innerHTML = headerHtml + rankings.map((p, i) => {
     const medal = medals[i] || `${i + 1}th`;
-    const col = playerColors[i % playerColors.length];
+    const col = getPlayerDisplayColor(p.color || 'red');
     let timeStr = '';
     if (p.finished) timeStr = `${(p.finishTime / 1000).toFixed(2)}s`;
     else if (!p.alive) timeStr = 'OUT OF LIVES';
@@ -3412,7 +3474,7 @@ function showCountdown() {
 // MENU NAVIGATION
 // ================================================================
 function hideAllMenuPanels() {
-  ['menuMain','menuCreate','menuJoin','menuLobby','menuResults'].forEach(id => {
+  ['menuMain','menuSinglePlayer','menuCreate','menuJoin','menuLobby','menuResults'].forEach(id => {
     document.getElementById(id).style.display = 'none';
   });
 }
@@ -3462,6 +3524,12 @@ function showLobby(code, players) {
   }
 }
 
+function showSinglePlayerSetup() {
+  hideAllMenuPanels();
+  document.getElementById('menuSinglePlayer').style.display = '';
+  renderColorPicker('singleColorPicker', []);
+}
+
 function startSinglePlayer() {
   multiplayerMode = false;
   hideMenu();
@@ -3478,6 +3546,7 @@ async function createRoom() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>CREATING...';
   document.getElementById('createError').textContent = '';
+  mySelectedColor = MARIO_COLOR_OPTIONS[Math.floor(Math.random() * MARIO_COLOR_OPTIONS.length)].id;
   try {
     let code = generateRoomCode();
     let existing = await db.collection('rooms').doc(code).get();
@@ -3488,6 +3557,7 @@ async function createRoom() {
     const playerData = {
       id: myPlayerId,
       name: name.substring(0, 12),
+      color: mySelectedColor,
       progress: 0, finished: false, finishTime: null,
       alive: true, coins: 0, gameScore: 0,
     };
@@ -3535,13 +3605,21 @@ async function joinRoom() {
       document.getElementById('joinError').textContent = 'Game already started';
       return;
     }
-    if (Object.keys(data.players || {}).length >= 4) {
-      document.getElementById('joinError').textContent = 'Room full (max 4)';
+    if (Object.keys(data.players || {}).length >= 10) {
+      document.getElementById('joinError').textContent = 'Room full (max 10)';
       return;
+    }
+    const takenColors = Object.values(data.players || {}).map(p => p.color).filter(Boolean);
+    if (takenColors.includes(mySelectedColor)) {
+      const availableColors = MARIO_COLOR_OPTIONS.filter(c => !takenColors.includes(c.id));
+      if (availableColors.length > 0) {
+        mySelectedColor = availableColors[Math.floor(Math.random() * availableColors.length)].id;
+      }
     }
     const playerData = {
       id: myPlayerId,
       name: name.substring(0, 12),
+      color: mySelectedColor,
       progress: 0, finished: false, finishTime: null,
       alive: true, coins: 0, gameScore: 0,
     };
@@ -3583,6 +3661,7 @@ function returnToLobby() {
       resetPlayers[pid] = {
         id: data.players[pid].id,
         name: data.players[pid].name,
+        color: data.players[pid].color || 'red',
         progress: 0, finished: false, finishTime: null,
         alive: true, coins: 0, gameScore: 0,
       };

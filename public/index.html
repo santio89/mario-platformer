@@ -123,6 +123,34 @@
   }
   .back-link:hover { color: #fff; }
 
+  .color-picker-label { color: #aaa; font-size: 11px; margin-top: 14px; margin-bottom: 6px; }
+  .color-picker { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 8px; max-width: 280px; }
+  .color-swatch {
+    width: 30px; height: 30px;
+    border-radius: 4px;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+    position: relative;
+  }
+  .color-swatch:hover { transform: scale(1.15); }
+  .color-swatch.selected { border-color: #fff; transform: scale(1.15); }
+  .color-swatch.taken {
+    opacity: 0.25;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .color-swatch.taken::after {
+    content: 'X';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #000;
+  }
+
   .spinner {
     display: inline-block;
     width: 18px; height: 18px;
@@ -219,13 +247,21 @@
     <div id="menuMain">
       <div class="menu-title">SUPER MARIO BROS</div>
       <div class="menu-subtitle">Battle Royale Edition</div>
-      <button class="menu-btn" onclick="startSinglePlayer()">SINGLE PLAYER</button>
+      <button class="menu-btn" onclick="showSinglePlayerSetup()">SINGLE PLAYER</button>
       <button class="menu-btn" onclick="showCreateRoom()">CREATE ROOM</button>
       <button class="menu-btn" onclick="showJoinRoom()">JOIN ROOM</button>
       <div class="controls-hint">
         Arrows: Move &nbsp; Space/Up: Jump &nbsp; Z/Shift: Run<br>
         ESC: Pause
       </div>
+    </div>
+
+    <div id="menuSinglePlayer" style="display:none;">
+      <div class="menu-title">SINGLE PLAYER</div>
+      <div class="color-picker-label">CHOOSE YOUR COLOR</div>
+      <div class="color-picker" id="singleColorPicker"></div>
+      <button class="menu-btn" onclick="startSinglePlayer()">START GAME</button>
+      <div class="back-link" onclick="showMainMenu()">&#8592; Back</div>
     </div>
 
     <div id="menuCreate" style="display:none;">
@@ -256,6 +292,8 @@
       <div class="room-code" id="lobbyCode"></div>
       <div class="menu-label">PLAYERS</div>
       <div class="player-list" id="lobbyPlayers"></div>
+      <div class="color-picker-label">YOUR COLOR</div>
+      <div class="color-picker" id="lobbyColorPicker"></div>
       <button class="menu-btn" id="startBtn" onclick="startMultiplayerGame()" style="display:none;">START MATCH</button>
       <div class="menu-label" id="waitMsg" style="display:none;">Waiting for host to start...</div>
       <div class="back-link" onclick="leaveRoom()">&#8592; Leave Room</div>
