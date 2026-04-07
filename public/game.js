@@ -2221,11 +2221,9 @@ function update() {
     matchTimeRemaining = Math.max(0, Math.ceil(roomMatchDuration - (Date.now() - roomStartTime) / 1000));
     if (isHost && matchTimeRemaining <= 0 && !matchEnding) {
       matchEnding = true;
-      roomRef && roomRef.get().then(function(snap) {
-        if (snap.exists && snap.data().state === 'playing') {
-          endMatch(snap.data());
-        }
-      });
+      if (socket && socket.connected) {
+        socket.emit('time_expired');
+      }
     }
   }
   if (eliminated) return;
@@ -3114,13 +3112,11 @@ function quitToMenu() {
 }
 
 // ================================================================
-// MULTIPLAYER (Firestore)
+// MULTIPLAYER (WebSocket)
 // ================================================================
 const MATCH_DURATION = 300;
-const myPlayerId = 'p_' + Math.random().toString(36).substring(2, 10);
-let db = null;
-let roomRef = null;
-let roomUnsubscribe = null;
+let myPlayerId = null;
+let socket = null;
 let multiplayerMode = false;
 let isHost = false;
 let currentRoomCode = '';
@@ -3178,208 +3174,135 @@ function renderColorPicker(containerId, takenColors) {
 
 function selectColor(containerId, colorId) {
   mySelectedColor = colorId;
-  if (containerId === 'lobbyColorPicker' && roomRef) {
-    var updates = {};
-    updates['players.' + myPlayerId + '.color'] = colorId;
-    roomRef.update(updates).catch(function() {});
+  if (containerId === 'lobbyColorPicker' && socket && socket.connected) {
+    socket.emit('change_color', { color: colorId });
   }
   renderColorPicker(containerId, []);
 }
 
-function initFirebase() {
-  if (db) return;
-  firebase.initializeApp({
-    apiKey: "AIzaSyASjYKQub3EyQKminv4kMHngIjHbQyJwPg",
-    authDomain: "mario-platformer-ead2f.firebaseapp.com",
-    projectId: "mario-platformer-ead2f",
-    storageBucket: "mario-platformer-ead2f.firebasestorage.app",
-    messagingSenderId: "997684889443",
-    appId: "1:997684889443:web:7aadf54bf890663aed7556"
+function connectSocket() {
+  if (socket && socket.connected) return;
+  const wsUrl = window.location.origin;
+  socket = io(wsUrl, { transports: ['websocket', 'polling'] });
+
+  socket.on('connect_error', () => {
+    console.error('WebSocket connection failed');
   });
-  db = firebase.firestore();
-}
 
-function generateRoomCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 5; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  return code;
-}
-
-function calcScore(player, rank) {
-  let s = 0;
-  const posBonus = [5000, 3000, 2000, 1500, 1000, 500, 250, 100];
-  s += posBonus[rank] || 50;
-  if (player.finished && player.finishTime) {
-    s += Math.max(0, Math.floor((MATCH_DURATION * 1000 - player.finishTime) / 50));
-  }
-  s += (player.coins || 0) * 200;
-  s += (player.gameScore || 0);
-  if (!player.finished) {
-    s += Math.floor((player.progress || 0) * 2000);
-  }
-  return s;
-}
-
-function endMatch(roomData) {
-  if (!roomRef) return;
-  const players = Object.values(roomData.players || {});
-  const finished = players.filter(function(p) { return p.finished; }).sort(function(a, b) { return a.finishTime - b.finishTime; });
-  const alive = players.filter(function(p) { return !p.finished && p.alive; }).sort(function(a, b) { return b.progress - a.progress; });
-  const dead = players.filter(function(p) { return !p.finished && !p.alive; }).sort(function(a, b) { return b.progress - a.progress; });
-  const rankings = [].concat(finished, alive, dead).map(function(p, i) {
-    return {
-      id: p.id, name: p.name, color: p.color || 'red', progress: p.progress,
-      finished: p.finished, finishTime: p.finishTime,
-      alive: p.alive, coins: p.coins, gameScore: p.gameScore,
-      rank: i + 1, finalScore: calcScore(p, i),
-    };
+  socket.on('player_joined', ({ players }) => {
+    updateLobbyPlayers(players);
   });
-  roomRef.update({ state: 'finished', rankings: rankings }).catch(function() {});
-}
 
-function checkMatchEnd(roomData) {
-  if (!isHost || roomData.state !== 'playing') return;
-  const players = Object.values(roomData.players || {});
-  if (players.length === 0) return;
-  if (players.some(function(p) { return p.finished; }) ||
-      players.every(function(p) { return p.finished || !p.alive; })) {
-    endMatch(roomData);
-  }
-}
-
-function subscribeToRoom(code) {
-  if (roomUnsubscribe) roomUnsubscribe();
-  roomRef = db.collection('rooms').doc(code);
-  var prevRoomState = null;
-
-  roomUnsubscribe = roomRef.onSnapshot(function(snap) {
-    if (!snap.exists) {
-      leaveRoom();
-      return;
+  socket.on('player_left', ({ players, hostId }) => {
+    isHost = hostId === myPlayerId;
+    if (gameState === 'menu') {
+      updateLobbyPlayers(players);
+      document.getElementById('startBtn').style.display = isHost ? '' : 'none';
+      document.getElementById('waitMsg').style.display = isHost ? 'none' : '';
     }
-    var data = snap.data();
-    var playersList = Object.values(data.players || {});
+    racePlayers = players;
+    updateTimeline(players);
+  });
 
-    if (data.players && data.hostId && !data.players[data.hostId]) {
-      var playerIds = Object.keys(data.players).sort();
-      if (playerIds.length > 0 && playerIds[0] === myPlayerId) {
-        roomRef.update({ hostId: myPlayerId });
+  socket.on('player_updated', ({ players }) => {
+    updateLobbyPlayers(players);
+  });
+
+  socket.on('host_changed', ({ hostId }) => {
+    isHost = hostId === myPlayerId;
+    document.getElementById('startBtn').style.display = isHost ? '' : 'none';
+    document.getElementById('waitMsg').style.display = isHost ? 'none' : '';
+  });
+
+  socket.on('countdown', () => {
+    showCountdown();
+  });
+
+  socket.on('game_start', ({ startTime, matchDuration, players }) => {
+    hideMenu();
+    resumeGame();
+    gameState = 'playing';
+    checkpointIndex = -1;
+    resetLevel();
+    roomStartTime = startTime;
+    roomMatchDuration = matchDuration || MATCH_DURATION;
+    matchTimeRemaining = roomMatchDuration;
+    matchEnding = false;
+    eliminated = false;
+    racePlayers = players;
+    updateTimeline(players);
+    document.getElementById('raceTimeline').classList.add('visible');
+  });
+
+  socket.on('room_state', ({ players }) => {
+    if (gameState !== 'playing' && gameState !== 'win') return;
+    const localProgress = Math.min(1, mario.x / ((LEVEL_WIDTH - 15) * TILE));
+    racePlayers = players.map(p => {
+      if (p.id === myPlayerId) {
+        return Object.assign({}, p, {
+          progress: localProgress,
+          coins: coins,
+          gameScore: score,
+          alive: !eliminated && lives > 0,
+        });
       }
+      return p;
+    });
+    updateTimeline(racePlayers);
+  });
+
+  socket.on('match_finished', ({ rankings }) => {
+    matchEnding = false;
+    gameState = 'menu';
+    showResults(rankings);
+  });
+
+  socket.on('returned_to_lobby', ({ players }) => {
+    gameState = 'menu';
+    eliminated = false;
+    document.getElementById('raceTimeline').classList.remove('visible');
+    showLobby(currentRoomCode, players);
+  });
+
+  socket.on('disconnect', () => {
+    if (multiplayerMode && gameState === 'playing') {
+      multiplayerMode = false;
+      isHost = false;
+      currentRoomCode = '';
     }
-
-    isHost = data.hostId === myPlayerId;
-
-    switch (data.state) {
-      case 'waiting':
-        updateLobbyPlayers(playersList);
-        if (prevRoomState === 'finished' || prevRoomState === 'playing') {
-          gameState = 'menu';
-          document.getElementById('raceTimeline').classList.remove('visible');
-          showLobby(currentRoomCode, playersList);
-        }
-        document.getElementById('startBtn').style.display = isHost ? '' : 'none';
-        document.getElementById('waitMsg').style.display = isHost ? 'none' : '';
-        break;
-
-      case 'countdown':
-        if (prevRoomState !== 'countdown') {
-          showCountdown();
-        }
-        break;
-
-      case 'playing':
-        if (prevRoomState !== 'playing') {
-          hideMenu();
-          resumeGame();
-          gameState = 'playing';
-          checkpointIndex = -1;
-          resetLevel();
-          roomStartTime = data.startTime;
-          roomMatchDuration = data.matchDuration || MATCH_DURATION;
-          matchTimeRemaining = roomMatchDuration;
-          matchEnding = false;
-        }
-        racePlayers = playersList;
-        updateTimeline(playersList);
-        checkMatchEnd(data);
-        break;
-
-      case 'finished':
-        if (prevRoomState !== 'finished') {
-          matchEnding = false;
-          gameState = 'menu';
-          if (data.rankings) {
-            showResults(data.rankings);
-          }
-        }
-        break;
-    }
-
-    prevRoomState = data.state;
-  }, function(err) {
-    console.error('Room listener error:', err);
   });
 }
 
 function writeProgress() {
-  if (!roomRef || !multiplayerMode || gameState !== 'playing' || eliminated) return;
+  if (!socket || !socket.connected || !multiplayerMode || gameState !== 'playing' || eliminated) return;
   var now = Date.now();
-  if (now - lastProgressWrite < 1000) return;
+  if (now - lastProgressWrite < 500) return;
   lastProgressWrite = now;
   var progress = Math.min(1, mario.x / ((LEVEL_WIDTH - 15) * TILE));
-  var updates = {};
-  updates['players.' + myPlayerId + '.progress'] = progress;
-  updates['players.' + myPlayerId + '.coins'] = coins;
-  updates['players.' + myPlayerId + '.gameScore'] = score;
-  roomRef.update(updates).catch(function() {});
+  socket.emit('progress', { progress, coins, gameScore: score });
 }
 
 function writePlayerFinished() {
-  if (!roomRef) return;
-  var updates = {};
-  updates['players.' + myPlayerId + '.finished'] = true;
-  updates['players.' + myPlayerId + '.finishTime'] = Date.now() - roomStartTime;
-  updates['players.' + myPlayerId + '.progress'] = 1;
-  updates['players.' + myPlayerId + '.coins'] = coins;
-  updates['players.' + myPlayerId + '.gameScore'] = score;
-  roomRef.update(updates).catch(function() {});
+  if (!socket || !socket.connected) return;
+  socket.emit('player_finished', {
+    finishTime: Date.now() - roomStartTime,
+    coins: coins,
+    gameScore: score,
+  });
 }
 
 function writePlayerDied() {
-  if (!roomRef) return;
-  var updates = {};
-  updates['players.' + myPlayerId + '.alive'] = false;
-  updates['players.' + myPlayerId + '.coins'] = coins;
-  updates['players.' + myPlayerId + '.gameScore'] = score;
-  updates['players.' + myPlayerId + '.progress'] = Math.min(1, mario.x / ((LEVEL_WIDTH - 15) * TILE));
-  roomRef.update(updates).catch(function() {});
+  if (!socket || !socket.connected) return;
+  socket.emit('player_died', {
+    coins: coins,
+    gameScore: score,
+    progress: Math.min(1, mario.x / ((LEVEL_WIDTH - 15) * TILE)),
+  });
 }
 
 function cleanupRoom() {
-  if (roomUnsubscribe) {
-    roomUnsubscribe();
-    roomUnsubscribe = null;
-  }
-  if (roomRef) {
-    var ref = roomRef;
-    roomRef = null;
-    ref.get().then(function(snap) {
-      if (!snap.exists) return;
-      var data = snap.data();
-      var playerCount = Object.keys(data.players || {}).length;
-      if (playerCount <= 1) {
-        ref.delete().catch(function() {});
-      } else {
-        var updates = {};
-        updates['players.' + myPlayerId] = firebase.firestore.FieldValue.delete();
-        if (data.hostId === myPlayerId) {
-          var otherIds = Object.keys(data.players).filter(function(id) { return id !== myPlayerId; }).sort();
-          if (otherIds.length > 0) updates.hostId = otherIds[0];
-        }
-        ref.update(updates).catch(function() {});
-      }
-    }).catch(function() {});
+  if (socket && socket.connected) {
+    socket.emit('leave_room');
   }
   roomStartTime = 0;
   matchEnding = false;
@@ -3387,10 +3310,8 @@ function cleanupRoom() {
 }
 
 window.addEventListener('beforeunload', function() {
-  if (roomRef && multiplayerMode) {
-    var updates = {};
-    updates['players.' + myPlayerId] = firebase.firestore.FieldValue.delete();
-    roomRef.update(updates);
+  if (socket && socket.connected && multiplayerMode) {
+    socket.emit('leave_room');
   }
 });
 
@@ -3496,14 +3417,12 @@ function showMainMenu() {
 }
 
 function showCreateRoom() {
-  initFirebase();
   hideAllMenuPanels();
   document.getElementById('menuCreate').style.display = '';
   document.getElementById('createError').textContent = '';
 }
 
 function showJoinRoom() {
-  initFirebase();
   hideAllMenuPanels();
   document.getElementById('menuJoin').style.display = '';
   document.getElementById('joinError').textContent = '';
@@ -3539,54 +3458,45 @@ function startSinglePlayer() {
   resetLevel();
 }
 
-async function createRoom() {
-  initFirebase();
+function createRoom() {
+  connectSocket();
   const btn = document.querySelector('#menuCreate .menu-btn');
   const name = document.getElementById('createName').value.trim() || 'Mario';
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>CREATING...';
   document.getElementById('createError').textContent = '';
   mySelectedColor = MARIO_COLOR_OPTIONS[Math.floor(Math.random() * MARIO_COLOR_OPTIONS.length)].id;
-  try {
-    let code = generateRoomCode();
-    let existing = await db.collection('rooms').doc(code).get();
-    while (existing.exists) {
-      code = generateRoomCode();
-      existing = await db.collection('rooms').doc(code).get();
-    }
-    const playerData = {
-      id: myPlayerId,
-      name: name.substring(0, 12),
-      color: mySelectedColor,
-      progress: 0, finished: false, finishTime: null,
-      alive: true, coins: 0, gameScore: 0,
-    };
-    await db.collection('rooms').doc(code).set({
-      code: code,
-      hostId: myPlayerId,
-      state: 'waiting',
-      startTime: null,
-      matchDuration: MATCH_DURATION,
-      createdAt: Date.now(),
-      rankings: null,
-      players: { [myPlayerId]: playerData },
+
+  const tryCreate = () => {
+    socket.emit('create_room', { name, color: mySelectedColor }, (res) => {
+      btn.disabled = false;
+      btn.innerHTML = 'CREATE';
+      if (!res.ok) {
+        document.getElementById('createError').textContent = res.error || 'Failed to create room';
+        return;
+      }
+      myPlayerId = res.playerId;
+      isHost = true;
+      multiplayerMode = true;
+      currentRoomCode = res.code;
+      showLobby(res.code, res.players);
     });
-    isHost = true;
-    multiplayerMode = true;
-    currentRoomCode = code;
-    subscribeToRoom(code);
-    showLobby(code, [playerData]);
-  } catch (err) {
-    document.getElementById('createError').textContent = 'Failed to create room';
-    console.error(err);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = 'CREATE';
+  };
+
+  if (socket.connected) {
+    tryCreate();
+  } else {
+    socket.once('connect', tryCreate);
+    socket.once('connect_error', () => {
+      btn.disabled = false;
+      btn.innerHTML = 'CREATE';
+      document.getElementById('createError').textContent = 'Failed to connect to server';
+    });
   }
 }
 
-async function joinRoom() {
-  initFirebase();
+function joinRoom() {
+  connectSocket();
   const btn = document.querySelector('#menuJoin .menu-btn');
   const code = document.getElementById('joinCode').value.trim().toUpperCase();
   const name = document.getElementById('joinName').value.trim() || 'Luigi';
@@ -3594,80 +3504,44 @@ async function joinRoom() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>JOINING...';
   document.getElementById('joinError').textContent = '';
-  try {
-    const snap = await db.collection('rooms').doc(code).get();
-    if (!snap.exists) {
-      document.getElementById('joinError').textContent = 'Room not found';
-      return;
-    }
-    const data = snap.data();
-    if (data.state !== 'waiting') {
-      document.getElementById('joinError').textContent = 'Game already started';
-      return;
-    }
-    if (Object.keys(data.players || {}).length >= 10) {
-      document.getElementById('joinError').textContent = 'Room full (max 10)';
-      return;
-    }
-    const takenColors = Object.values(data.players || {}).map(p => p.color).filter(Boolean);
-    if (takenColors.includes(mySelectedColor)) {
-      const availableColors = MARIO_COLOR_OPTIONS.filter(c => !takenColors.includes(c.id));
-      if (availableColors.length > 0) {
-        mySelectedColor = availableColors[Math.floor(Math.random() * availableColors.length)].id;
+
+  const tryJoin = () => {
+    socket.emit('join_room', { code, name, color: mySelectedColor }, (res) => {
+      btn.disabled = false;
+      btn.innerHTML = 'JOIN';
+      if (!res.ok) {
+        document.getElementById('joinError').textContent = res.error || 'Failed to join room';
+        return;
       }
-    }
-    const playerData = {
-      id: myPlayerId,
-      name: name.substring(0, 12),
-      color: mySelectedColor,
-      progress: 0, finished: false, finishTime: null,
-      alive: true, coins: 0, gameScore: 0,
-    };
-    await db.collection('rooms').doc(code).update({
-      ['players.' + myPlayerId]: playerData,
+      myPlayerId = res.playerId;
+      mySelectedColor = res.color;
+      isHost = res.hostId === myPlayerId;
+      multiplayerMode = true;
+      currentRoomCode = res.code;
+      showLobby(res.code, res.players);
     });
-    isHost = false;
-    multiplayerMode = true;
-    currentRoomCode = code;
-    subscribeToRoom(code);
-    const merged = Object.assign({}, data.players);
-    merged[myPlayerId] = playerData;
-    showLobby(code, Object.values(merged));
-  } catch (err) {
-    document.getElementById('joinError').textContent = 'Failed to join room';
-    console.error(err);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = 'JOIN';
+  };
+
+  if (socket.connected) {
+    tryJoin();
+  } else {
+    socket.once('connect', tryJoin);
+    socket.once('connect_error', () => {
+      btn.disabled = false;
+      btn.innerHTML = 'JOIN';
+      document.getElementById('joinError').textContent = 'Failed to connect to server';
+    });
   }
 }
 
 function startMultiplayerGame() {
-  if (!roomRef || !isHost) return;
-  roomRef.update({ state: 'countdown' });
-  setTimeout(function() {
-    if (!roomRef) return;
-    roomRef.update({ state: 'playing', startTime: Date.now() });
-  }, 3000);
+  if (!socket || !socket.connected || !isHost) return;
+  socket.emit('start_game');
 }
 
 function returnToLobby() {
-  if (!roomRef || !isHost) return;
-  roomRef.get().then(function(snap) {
-    if (!snap.exists) return;
-    var data = snap.data();
-    var resetPlayers = {};
-    Object.keys(data.players || {}).forEach(function(pid) {
-      resetPlayers[pid] = {
-        id: data.players[pid].id,
-        name: data.players[pid].name,
-        color: data.players[pid].color || 'red',
-        progress: 0, finished: false, finishTime: null,
-        alive: true, coins: 0, gameScore: 0,
-      };
-    });
-    roomRef.update({ state: 'waiting', startTime: null, rankings: null, players: resetPlayers });
-  });
+  if (!socket || !socket.connected || !isHost) return;
+  socket.emit('return_to_lobby');
 }
 
 function leaveRoom() {
@@ -3675,6 +3549,7 @@ function leaveRoom() {
   multiplayerMode = false;
   isHost = false;
   currentRoomCode = '';
+  myPlayerId = null;
   showMenu();
 }
 
