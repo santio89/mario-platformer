@@ -90,7 +90,7 @@ function checkMatchEnd(room) {
   if (room.state !== 'playing') return;
   const players = Array.from(room.players.values());
   if (players.length === 0) return;
-  if (players.some(p => p.finished) || players.every(p => p.finished || !p.alive)) {
+  if (players.every(p => p.finished || !p.alive)) {
     endMatch(room);
   }
 }

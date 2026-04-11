@@ -1118,6 +1118,7 @@ let dustParticles = [];
 let eliminated = false;
 let racePlayers = [];
 let checkpointIndex = -1;
+let checkpointMessageTimer = 0;
 let mapCoins = [];
 let enemiesKilled = 0;
 let flagBonus = 0;
@@ -1169,11 +1170,13 @@ function resetLevel() {
   dustParticles = [];
   marioFireballs = [];
   fireballCooldown = 0;
-  eliminated = false;
-  racePlayers = [];
-  score = 0;
-  coins = 0;
-  enemiesKilled = 0;
+  if (!multiplayerMode) {
+    eliminated = false;
+    racePlayers = [];
+    score = 0;
+    coins = 0;
+    enemiesKilled = 0;
+  }
   flagBonus = 0;
   timeBonus = 0;
   time = 400;
@@ -1187,6 +1190,7 @@ function resetLevel() {
   emptyBlocks = new Set();
   jumpBufferTimer = 0;
   jumpPressed = false;
+  checkpointMessageTimer = 0;
   boss = null;
   bossFireballs = [];
   resetMario();
@@ -1403,6 +1407,32 @@ function hitBlock(tx, ty) {
   } else if (tile === 5) {
     playSound('bump');
   }
+
+  items.forEach(item => {
+    if (!item.active || item.emerging) return;
+    const blockTop = ty * TILE;
+    if (Math.abs(item.y + item.h - blockTop) < 4 &&
+        item.x + item.w > tx * TILE && item.x < (tx + 1) * TILE) {
+      item.vx = -item.vx;
+      if (item.vx === 0) item.vx = mario.facing;
+      item.vy = -3;
+    }
+  });
+
+  entities.forEach(e => {
+    if (!e.alive || e.type === 'piranha') return;
+    const blockTop = ty * TILE;
+    if (Math.abs(e.y + e.h - blockTop) < 4 &&
+        e.x + e.w > tx * TILE && e.x < (tx + 1) * TILE) {
+      e.alive = false;
+      e.remove = true;
+      const pts = ENEMY_POINTS[e.type] || 100;
+      score += pts;
+      enemiesKilled++;
+      addScorePopup(e.x, e.y - 8, pts);
+      playSound('stomp');
+    }
+  });
 }
 
 // ================================================================
@@ -1650,6 +1680,7 @@ function updateMario() {
   for (let ci = 0; ci < CHECKPOINT_XS.length; ci++) {
     if (ci > checkpointIndex && mario.x >= CHECKPOINT_XS[ci] * TILE) {
       checkpointIndex = ci;
+      checkpointMessageTimer = 120;
       playSound('powerup');
     }
   }
@@ -2179,14 +2210,20 @@ function updateMarioFireballs() {
         boss.hp--;
         boss.invincible = 40;
         fb.remove = true;
-        playSound('bosshit');
         if (boss.hp <= 0) {
           boss.alive = false;
           boss.dying = true;
-          boss.dyingTimer = 60;
+          boss.vy = -5;
+          boss.deathTimer = 0;
           score += ENEMY_POINTS.boss;
           addScorePopup(boss.x, boss.y - 16, ENEMY_POINTS.boss);
+          enemiesKilled++;
           playSound('bossdie');
+          for (let gy = 6; gy <= 12; gy++) levelMap[gy][BOSS_GATE_X] = 0;
+        } else {
+          playSound('bosshit');
+          addScorePopup(boss.x, boss.y - 8, 500);
+          score += 500;
         }
       }
     }
@@ -2236,7 +2273,13 @@ function update() {
     gameOverTimer++;
     if (gameOverTimer > 120) {
       gameState = 'playing';
+      const savedTime = time;
+      const savedTimeTimer = timeTimer;
+      const savedMatchTime = matchTimeRemaining;
       resetLevel();
+      time = savedTime;
+      timeTimer = savedTimeTimer;
+      matchTimeRemaining = savedMatchTime;
     }
     return;
   }
@@ -3078,23 +3121,47 @@ function render() {
   drawMario();
   drawHUD();
 
+  if (checkpointMessageTimer > 0) {
+    checkpointMessageTimer--;
+    const cpAlpha = checkpointMessageTimer > 20 ? 1.0 : checkpointMessageTimer / 20;
+    bx.save();
+    bx.globalAlpha = cpAlpha;
+    bx.fillStyle = 'rgba(0,0,0,0.6)';
+    bx.fillRect(0, VIEW_H / 2 - 14, VIEW_W, 22);
+    const cpText = 'CHECKPOINT REACHED';
+    const cpW = cpText.length * 6;
+    drawPixelText(bx, cpText, Math.round((VIEW_W - cpW) / 2), VIEW_H / 2 - 8, '#00c800', '#000');
+    bx.restore();
+  }
+
   if (eliminated && multiplayerMode) {
     bx.fillStyle = 'rgba(0,0,0,0.7)';
     bx.fillRect(0, VIEW_H / 2 - 48, VIEW_W, 96);
 
-    const elText = 'OUT OF LIVES';
+    const elText = 'ELIMINATED';
     const elW = elText.length * 6;
-    drawPixelText(bx, elText, Math.round((VIEW_W - elW) / 2), VIEW_H / 2 - 40, '#e44030', '#000');
+    drawPixelText(bx, elText, Math.round((VIEW_W - elW) / 2), VIEW_H / 2 - 36, '#e44030', '#000');
 
-    drawPixelText(bx, 'YOUR SCORE', 32, VIEW_H / 2 - 24, '#f8d830', '#000');
-    drawPixelText(bx, 'COINS: ' + coins, 32, VIEW_H / 2 - 12, '#fff', '#000');
-    drawPixelText(bx, 'ENEMIES: ' + enemiesKilled, 32, VIEW_H / 2 - 2, '#fff', '#000');
+    drawPixelText(bx, 'YOUR SCORE', 32, VIEW_H / 2 - 20, '#f8d830', '#000');
+    drawPixelText(bx, 'COINS: ' + coins, 32, VIEW_H / 2 - 8, '#fff', '#000');
+    drawPixelText(bx, 'ENEMIES: ' + enemiesKilled, 32, VIEW_H / 2 + 2, '#fff', '#000');
     const totalText = 'TOTAL: ' + score;
-    drawPixelText(bx, totalText, 32, VIEW_H / 2 + 12, '#f8d830', '#000');
+    drawPixelText(bx, totalText, 32, VIEW_H / 2 + 14, '#f8d830', '#000');
 
     const waitText = 'WAITING FOR MATCH TO END...';
     const waitW = waitText.length * 6;
     drawPixelText(bx, waitText, Math.round((VIEW_W - waitW) / 2), VIEW_H / 2 + 30, '#aaa', '#000');
+  }
+
+  if (gameState === 'win' && multiplayerMode && !eliminated) {
+    bx.fillStyle = 'rgba(0,0,0,0.6)';
+    bx.fillRect(0, VIEW_H / 2 - 24, VIEW_W, 48);
+    const mcText = 'COURSE CLEAR!';
+    const mcW = mcText.length * 6;
+    drawPixelText(bx, mcText, Math.round((VIEW_W - mcW) / 2), VIEW_H / 2 - 16, '#f8d830', '#000');
+    const mwText = 'WAITING FOR OTHERS...';
+    const mwW = mwText.length * 6;
+    drawPixelText(bx, mwText, Math.round((VIEW_W - mwW) / 2), VIEW_H / 2 + 4, '#aaa', '#000');
   }
 
   if (gameState === 'win' && !multiplayerMode) {
@@ -3193,6 +3260,7 @@ let roomMatchDuration = MATCH_DURATION;
 let matchEnding = false;
 let lastProgressWrite = 0;
 let mySelectedColor = 'red';
+let currentLobbyTakenColors = [];
 
 const MARIO_COLOR_OPTIONS = [
   { id: 'red',    label: 'Red',    hat: '#e44030', overalls: '#6b88ff', skin: '#fcbcb0', brown: '#ac7c00' },
@@ -3241,11 +3309,13 @@ function renderColorPicker(containerId, takenColors) {
 }
 
 function selectColor(containerId, colorId) {
+  if (containerId === 'lobbyColorPicker' && currentLobbyTakenColors.includes(colorId)) return;
   mySelectedColor = colorId;
   if (containerId === 'lobbyColorPicker' && socket && socket.connected) {
     socket.emit('change_color', { color: colorId });
   }
-  renderColorPicker(containerId, []);
+  const taken = containerId === 'lobbyColorPicker' ? currentLobbyTakenColors : [];
+  renderColorPicker(containerId, taken);
 }
 
 function connectSocket() {
@@ -3291,12 +3361,15 @@ function connectSocket() {
     resumeGame();
     gameState = 'playing';
     checkpointIndex = -1;
+    score = 0;
+    coins = 0;
+    enemiesKilled = 0;
+    eliminated = false;
     resetLevel();
     roomStartTime = startTime;
     roomMatchDuration = matchDuration || MATCH_DURATION;
     matchTimeRemaining = roomMatchDuration;
     matchEnding = false;
-    eliminated = false;
     racePlayers = players;
     updateTimeline(players);
     document.getElementById('raceTimeline').classList.add('visible');
@@ -3390,8 +3463,8 @@ function updateLobbyPlayers(players) {
     return `<div style="color:${col}">${i === 0 ? '&#9733; ' : '  '}${p.name}${p.id === myPlayerId ? ' (You)' : ''}</div>`;
   }).join('');
 
-  const takenColors = players.filter(p => p.id !== myPlayerId).map(p => p.color).filter(Boolean);
-  renderColorPicker('lobbyColorPicker', takenColors);
+  currentLobbyTakenColors = players.filter(p => p.id !== myPlayerId).map(p => p.color).filter(Boolean);
+  renderColorPicker('lobbyColorPicker', currentLobbyTakenColors);
 }
 
 function updateTimeline(players) {
@@ -3401,7 +3474,7 @@ function updateTimeline(players) {
     const col = getPlayerDisplayColor(p.color || 'red');
     let status = '';
     if (p.finished) status = ` ${(p.finishTime / 1000).toFixed(1)}s`;
-    else if (!p.alive) status = ' DEAD';
+    else if (!p.alive) status = ' OUT';
     return `<div class="timeline-player">
       <div class="timeline-name" style="color:${col}">${p.name}${status}</div>
       <div class="timeline-bar-bg">
@@ -3429,7 +3502,7 @@ function showResults(rankings) {
     const col = getPlayerDisplayColor(p.color || 'red');
     let timeStr = '';
     if (p.finished) timeStr = `${(p.finishTime / 1000).toFixed(2)}s`;
-    else if (!p.alive) timeStr = 'OUT OF LIVES';
+    else if (!p.alive) timeStr = 'ELIMINATED';
     else timeStr = `${Math.round((p.progress || 0) * 100)}%`;
     const finalScore = p.finalScore || 0;
     const coinStr = p.coins ? ` Coins:${p.coins}` : '';

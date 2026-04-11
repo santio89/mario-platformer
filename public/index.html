@@ -149,7 +149,7 @@
   .back-link:hover { color: #f0c838; }
 
   .color-picker-label { color: #c08050; font-family: 'Press Start 2P', 'Courier New', monospace; font-size: 7px; margin-top: 14px; margin-bottom: 6px; letter-spacing: 1px; }
-  .color-picker { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 8px; max-width: min(280px, 90%); }
+  .color-picker { display: grid; grid-template-columns: repeat(5, 30px); gap: 6px; justify-content: center; margin-bottom: 8px; }
   .color-swatch {
     width: 30px; height: 30px;
     border-radius: 4px;
@@ -323,7 +323,7 @@
     .room-code { font-size: 14px; }
     .player-list { font-size: 6px; min-width: 180px; }
     .color-swatch { width: 24px; height: 24px; }
-    .color-picker { max-width: 220px; }
+    .color-picker { grid-template-columns: repeat(5, 24px); }
     .controls-hint { font-size: 5px; margin-top: 14px; }
     .pause-title { font-size: 12px; }
     .back-link { font-size: 6px; }
