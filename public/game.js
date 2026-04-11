@@ -1208,7 +1208,6 @@ function spawnEnemies() {
     195, 197, 215, 217, 222, 224, 228, 230, 234, 238, 240, 244, 250, 252,
     268, 277, 286, 295,
     308, 312, 316, 318, 324, 328, 330, 332,
-    340, 342, 345,
   ];
   goombaXs.forEach(x => {
     let gy = 12 * TILE;
@@ -1217,11 +1216,11 @@ function spawnEnemies() {
     entities.push(createGoomba(x * TILE, gy));
   });
 
-  [45, 55, 75, 90, 125, 142, 160, 192, 220, 235, 248, 275, 300, 318, 325, 337].forEach(x => {
+  [45, 55, 75, 90, 125, 142, 160, 192, 220, 235, 248, 275, 300, 318, 325].forEach(x => {
     entities.push(createKoopa(x * TILE, 12 * TILE));
   });
 
-  [110, 155, 225, 310, 344].forEach(x => {
+  [110, 155, 225, 310].forEach(x => {
     entities.push(createBuzzyBeetle(x * TILE, 12 * TILE));
   });
 
@@ -1251,7 +1250,6 @@ function spawnMapCoins() {
     [293, 8], [294, 8], [295, 8],
     [314, 11], [315, 11],
     [326, 7], [327, 7],
-    [341, 11], [343, 11], [345, 11],
   ];
   coinPositions.forEach(([tx, ty]) => {
     if (levelMap[ty] && levelMap[ty][tx]) ty--;
@@ -1671,7 +1669,7 @@ function updateMario() {
     if (timeTimer >= 36) {
       timeTimer = 0;
       time--;
-      if (time <= 30 && time > 0 && time % 2 === 0) playSound('warning');
+      if (time <= 10 && time > 0) playSound('warning');
       if (time <= 0) mariodie();
     }
   }
@@ -1794,18 +1792,7 @@ function updateEntities() {
       }
       if (mario.invincible > 0) return;
       if (mx < e.x + e.w && mx + mw > e.x && my < e.y + visH && my + mh > e.y) {
-        if (mario.vy > 0 && my + mh - e.y < 10) {
-          const pts = ENEMY_POINTS.piranha;
-          e.alive = false;
-          e.remove = true;
-          score += pts;
-          enemiesKilled++;
-          addScorePopup(e.x, e.y - 8, pts);
-          playSound('stomp');
-          mario.vy = -4.5;
-        } else {
-          mariodie();
-        }
+        mariodie();
       }
       return;
     }
@@ -1994,21 +1981,33 @@ function updateBoss() {
 
   if (!boss.alive) return;
 
-  // Only activate boss when Mario is near the arena
   if (Math.abs(mario.x - boss.x) > VIEW_W * 1.5) return;
 
   if (boss.invincible > 0) boss.invincible--;
 
-  // Gravity
+  const phase = boss.hp;
+  const baseSpeed = phase === 1 ? 1.2 : phase === 2 ? 0.8 : 0.5;
+  const jumpInterval = phase === 1 ? 55 : phase === 2 ? 75 : 100;
+  const fireInterval = phase === 1 ? 55 : phase === 2 ? 70 : 90;
+  const facingDir = mario.x < boss.x ? -1 : 1;
+
   boss.vy += GRAVITY_DOWN;
   if (boss.vy > MAX_FALL) boss.vy = MAX_FALL;
 
-  // Horizontal movement
+  if (phase <= 2) {
+    boss.vx += facingDir * 0.05;
+    if (Math.abs(boss.vx) > baseSpeed) boss.vx = facingDir * baseSpeed;
+  }
   boss.x += boss.vx;
-  if (boss.x <= boss.arenaLeft) { boss.x = boss.arenaLeft; boss.vx = Math.abs(boss.vx); }
-  if (boss.x + boss.w >= boss.arenaRight) { boss.x = boss.arenaRight - boss.w; boss.vx = -Math.abs(boss.vx); }
+  if (boss.x <= boss.arenaLeft) {
+    boss.x = boss.arenaLeft;
+    boss.vx = phase <= 2 ? 0.2 : baseSpeed;
+  }
+  if (boss.x + boss.w >= boss.arenaRight) {
+    boss.x = boss.arenaRight - boss.w;
+    boss.vx = phase <= 2 ? -0.2 : -baseSpeed;
+  }
 
-  // Vertical
   boss.y += boss.vy;
   boss.onGround = false;
   const bc = tileCollision(boss.x + 2, boss.y, boss.w - 4, boss.h);
@@ -2017,31 +2016,39 @@ function updateBoss() {
     else { boss.y = (bc.ty + 1) * TILE; boss.vy = 0; }
   }
 
-  // Jump
   boss.jumpTimer++;
-  if (boss.jumpTimer > 90 + Math.random() * 60 && boss.onGround) {
-    boss.vy = -6.5;
+  if (boss.jumpTimer > jumpInterval + Math.random() * 30 && boss.onGround) {
+    boss.vy = phase === 1 ? -7.5 : -6.5;
     boss.jumpTimer = 0;
   }
 
-  // Throw fireballs toward Mario
   boss.fireTimer++;
-  if (boss.fireTimer > 80 + Math.random() * 40) {
+  if (boss.fireTimer > fireInterval + Math.random() * 25) {
     boss.fireTimer = 0;
-    const dir = mario.x < boss.x ? -1 : 1;
+    const dir = facingDir;
+    const fx = boss.x + (dir > 0 ? boss.w : -8);
     bossFireballs.push({
-      x: boss.x + (dir > 0 ? boss.w : -8),
-      y: boss.y + 10,
-      vx: dir * 2.5,
-      vy: -1.5,
-      life: 200,
+      x: fx, y: boss.y + 10,
+      vx: dir * (phase === 1 ? 3.2 : 2.5), vy: -1.5, life: 200,
     });
+    if (phase <= 2) {
+      bossFireballs.push({
+        x: fx, y: boss.y + 6,
+        vx: dir * 2.0, vy: -3.0, life: 200,
+      });
+    }
+    if (phase === 1) {
+      bossFireballs.push({
+        x: fx, y: boss.y + 16,
+        vx: dir * 3.0, vy: -0.5, life: 200,
+      });
+    }
     playSound('fireball');
   }
 
-  // Animation
   boss.frameTimer++;
-  if (boss.frameTimer > 16) { boss.frameTimer = 0; boss.frame = (boss.frame + 1) % 2; }
+  const animSpeed = phase === 1 ? 8 : phase === 2 ? 12 : 16;
+  if (boss.frameTimer > animSpeed) { boss.frameTimer = 0; boss.frame = (boss.frame + 1) % 2; }
 
   // Collision with Mario
   if (mario.dead || flagDescending) return;
@@ -2286,7 +2293,11 @@ function update() {
   if (gameState !== 'playing' || paused) return;
   globalTick++;
   if (multiplayerMode && roomStartTime > 0) {
+    const prevMatchTime = matchTimeRemaining;
     matchTimeRemaining = Math.max(0, Math.ceil(roomMatchDuration - (Date.now() - roomStartTime) / 1000));
+    if (matchTimeRemaining <= 10 && matchTimeRemaining > 0 && matchTimeRemaining !== prevMatchTime) {
+      playSound('warning');
+    }
     if (isHost && matchTimeRemaining <= 0 && !matchEnding) {
       matchEnding = true;
       if (socket && socket.connected) {
@@ -2812,21 +2823,30 @@ function drawBoss() {
   const sy = Math.floor(boss.y);
 
   if (boss.dying) {
-    drawPixels(bx, sx - 2, sy, BOWSER_SPRITE, BOWSER_PALETTE, true);
+    bx.save();
+    bx.translate(sx - 2, sy + 32);
+    bx.scale(1, -1);
+    drawPixels(bx, 0, 0, BOWSER_SPRITE, BOWSER_PALETTE, true);
+    bx.restore();
     return;
   }
 
   if (boss.invincible > 0 && (boss.invincible & 2)) return;
 
-  drawPixels(bx, sx - 2, sy, BOWSER_SPRITE, BOWSER_PALETTE, boss.vx > 0);
+  const faceMario = mario.x > boss.x;
+  drawPixels(bx, sx - 2, sy, BOWSER_SPRITE, BOWSER_PALETTE, faceMario);
 
-  // HP bar above boss
-  const barW = 24;
-  const barY = sy - 6;
-  bx.fillStyle = '#333';
-  bx.fillRect(sx + 2, barY, barW, 3);
-  bx.fillStyle = boss.hp === 1 ? '#ff3030' : boss.hp === 2 ? '#ffaa00' : '#00e000';
-  bx.fillRect(sx + 2, barY, Math.ceil(barW * boss.hp / 3), 3);
+  const barW = 30;
+  const barX = sx - 1;
+  const barY = sy - 12;
+  bx.fillStyle = 'rgba(0,0,0,0.55)';
+  bx.fillRect(barX - 1, barY - 1, barW + 4, 11);
+  drawPixelText(bx, 'BOSS', barX + 4, barY, '#f8d830', null);
+  bx.fillStyle = '#222';
+  bx.fillRect(barX, barY + 7, barW + 2, 3);
+  const hpColor = boss.hp === 1 ? '#ff3030' : boss.hp === 2 ? '#ffaa00' : '#00e000';
+  bx.fillStyle = hpColor;
+  bx.fillRect(barX, barY + 7, Math.ceil((barW + 2) * boss.hp / 3), 3);
 }
 
 function drawBossFireballs() {
