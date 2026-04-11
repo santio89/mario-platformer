@@ -63,7 +63,7 @@
     font-size: 22px;
     color: #f0c838;
     text-shadow: 2px 2px 0 #a03010, 0 0 12px rgba(240,160,40,0.25);
-    margin-bottom: 8px;
+    margin-bottom: 18px;
     letter-spacing: 2px;
     font-weight: normal;
   }
@@ -83,7 +83,7 @@
     font-size: 10px;
     font-family: 'Press Start 2P', 'Courier New', monospace;
     cursor: pointer;
-    margin: 6px;
+    margin: 8px;
     min-width: 220px;
     text-align: center;
     transition: all 0.12s;
@@ -114,7 +114,7 @@
   }
   .menu-input:focus { outline: none; border-color: #f0c838; }
   .menu-input::placeholder { color: #6c4030; font-size: 8px; letter-spacing: 1px; text-transform: none; }
-  .menu-label { color: #c08050; font-size: 7px; font-family: 'Press Start 2P', 'Courier New', monospace; margin-top: 14px; margin-bottom: 5px; letter-spacing: 1px; }
+  .menu-label { color: #c08050; font-size: 7px; font-family: 'Press Start 2P', 'Courier New', monospace; margin-top: 18px; margin-bottom: 8px; letter-spacing: 1px; }
   .room-code {
     font-family: 'Press Start 2P', 'Courier New', monospace;
     font-size: 20px;
@@ -128,7 +128,7 @@
     color: #8cc63f;
     font-family: 'Press Start 2P', 'Courier New', monospace;
     font-size: 8px;
-    margin: 8px 0;
+    margin: 10px 0;
     line-height: 2.2;
     text-align: left;
     min-width: min(240px, 90%);
@@ -142,24 +142,25 @@
     font-family: 'Press Start 2P', 'Courier New', monospace;
     font-size: 7px;
     cursor: pointer;
-    margin-top: 18px;
+    margin-top: 28px;
     text-decoration: none;
     letter-spacing: 1px;
   }
   .back-link:hover { color: #f0c838; }
 
-  .color-picker-label { color: #c08050; font-family: 'Press Start 2P', 'Courier New', monospace; font-size: 7px; margin-top: 14px; margin-bottom: 6px; letter-spacing: 1px; }
-  .color-picker { display: grid; grid-template-columns: repeat(5, 30px); gap: 6px; justify-content: center; margin-bottom: 8px; }
+  .color-picker-label { color: #c08050; font-family: 'Press Start 2P', 'Courier New', monospace; font-size: 7px; margin-top: 22px; margin-bottom: 12px; letter-spacing: 1px; }
+  .color-picker { display: grid; grid-template-columns: repeat(5, 34px); gap: 10px 8px; justify-content: center; margin-bottom: 24px; }
   .color-swatch {
-    width: 30px; height: 30px;
-    border-radius: 4px;
+    width: 34px; height: 34px;
+    border-radius: 5px;
     border: 3px solid transparent;
     cursor: pointer;
-    transition: transform 0.1s, border-color 0.1s;
+    transition: transform 0.1s, border-color 0.1s, box-shadow 0.1s;
     position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
   }
-  .color-swatch:hover { transform: scale(1.15); }
-  .color-swatch.selected { border-color: #fff; transform: scale(1.15); }
+  .color-swatch:hover { transform: scale(1.15); box-shadow: 0 3px 8px rgba(0,0,0,0.5); }
+  .color-swatch.selected { border-color: #fff; transform: scale(1.15); box-shadow: 0 0 8px rgba(255,255,255,0.4); }
   .color-swatch.taken {
     opacity: 0.25;
     cursor: not-allowed;
@@ -322,8 +323,8 @@
     .menu-label { font-size: 6px; }
     .room-code { font-size: 14px; }
     .player-list { font-size: 6px; min-width: 180px; }
-    .color-swatch { width: 24px; height: 24px; }
-    .color-picker { grid-template-columns: repeat(5, 24px); }
+    .color-swatch { width: 28px; height: 28px; }
+    .color-picker { grid-template-columns: repeat(5, 28px); gap: 8px 6px; margin-bottom: 18px; }
     .controls-hint { font-size: 5px; margin-top: 14px; }
     .pause-title { font-size: 12px; }
     .back-link { font-size: 6px; }
@@ -369,9 +370,13 @@
     #mobileControls { height: 90px; padding: 4px 16px; }
     .m-btn { width: 42px; height: 42px; font-size: 16px; }
     .overlay { padding: 6px 8px; }
-    .menu-title { font-size: 12px; margin-bottom: 4px; }
+    .menu-title { font-size: 12px; margin-bottom: 6px; }
     .menu-subtitle { margin-bottom: 8px; }
     .menu-btn { padding: 6px 12px; margin: 3px; }
+    .color-picker-label { margin-top: 10px; margin-bottom: 6px; }
+    .color-picker { margin-bottom: 12px; gap: 6px 5px; }
+    .color-swatch { width: 24px; height: 24px; }
+    .back-link { margin-top: 12px; }
   }
 </style>
 </head>
@@ -397,6 +402,7 @@
 
     <div id="menuSinglePlayer" style="display:none;">
       <div class="menu-title">SINGLE PLAYER</div>
+      <div style="width:160px;height:2px;background:linear-gradient(90deg,transparent,#c85020,transparent);margin:0 auto 6px auto;"></div>
       <div class="color-picker-label">CHOOSE YOUR COLOR</div>
       <div class="color-picker" id="singleColorPicker"></div>
       <button class="menu-btn" onclick="startSinglePlayer()">START GAME</button>
@@ -405,6 +411,7 @@
 
     <div id="menuCreate" style="display:none;">
       <div class="menu-title">CREATE ROOM</div>
+      <div style="width:160px;height:2px;background:linear-gradient(90deg,transparent,#c85020,transparent);margin:0 auto 6px auto;"></div>
       <div class="menu-label">YOUR NAME</div>
       <input class="menu-input" id="createName" placeholder="Mario" maxlength="12">
       <br>
@@ -415,6 +422,7 @@
 
     <div id="menuJoin" style="display:none;">
       <div class="menu-title">JOIN ROOM</div>
+      <div style="width:160px;height:2px;background:linear-gradient(90deg,transparent,#c85020,transparent);margin:0 auto 6px auto;"></div>
       <div class="menu-label">ROOM CODE</div>
       <input class="menu-input" id="joinCode" placeholder="ABCDE" maxlength="5">
       <div class="menu-label">YOUR NAME</div>
@@ -427,7 +435,8 @@
 
     <div id="menuLobby" style="display:none;">
       <div class="menu-title">ROOM LOBBY</div>
-      <div>Room Code:</div>
+      <div style="width:160px;height:2px;background:linear-gradient(90deg,transparent,#c85020,transparent);margin:0 auto 10px auto;"></div>
+      <div class="menu-label" style="margin-top:8px;">ROOM CODE</div>
       <div class="room-code" id="lobbyCode"></div>
       <div class="menu-label">PLAYERS</div>
       <div class="player-list" id="lobbyPlayers"></div>
@@ -440,6 +449,7 @@
 
     <div id="menuResults" style="display:none;">
       <div class="menu-title">MATCH RESULTS</div>
+      <div style="width:160px;height:2px;background:linear-gradient(90deg,transparent,#c85020,transparent);margin:0 auto 6px auto;"></div>
       <div class="player-list" id="resultsPlayers" style="min-width:min(300px, 90%);"></div>
       <button class="menu-btn" id="replayBtn" onclick="returnToLobby()" style="display:none;">PLAY AGAIN</button>
       <div class="back-link" onclick="leaveRoom()">&#8592; Leave</div>
