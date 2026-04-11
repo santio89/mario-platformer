@@ -544,42 +544,62 @@ const GOOMBA_FLAT = [
 const GOOMBA_PALETTE = { 1: COL.goomba, 2: COL.white, 3: COL.black };
 
 const KOOPA_SPRITE = [
-  [0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0],
-  [0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0],
-  [0,0,0,0,1,2,2,1,2,1,0,0,0,0,0,0],
-  [0,0,0,0,1,2,3,2,2,1,0,0,0,0,0,0],
-  [0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0],
-  [0,0,0,0,4,1,1,1,1,0,0,0,0,0,0,0],
-  [0,0,0,4,4,4,1,1,1,4,0,0,0,0,0,0],
-  [0,0,4,4,4,4,1,1,4,4,4,0,0,0,0,0],
-  [0,0,4,5,4,4,1,4,4,5,4,0,0,0,0,0],
-  [0,0,4,5,5,4,4,4,5,5,4,0,0,0,0,0],
-  [0,0,0,4,5,5,4,5,5,4,0,0,0,0,0,0],
-  [0,0,0,0,4,4,4,4,4,0,0,0,0,0,0,0],
-  [0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0],
-  [0,0,0,0,6,6,0,6,6,0,0,0,0,0,0,0],
-  [0,0,0,6,6,6,0,6,6,6,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0],
+  [0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0],
+  [0,0,0,0,2,3,1,3,2,0,0,0,0,0,0,0],
+  [0,0,0,0,1,1,6,1,1,0,0,0,0,0,0,0],
+  [0,0,0,4,4,1,1,1,4,4,0,0,0,0,0,0],
+  [0,0,4,4,4,4,4,4,4,4,4,0,0,0,0,0],
+  [0,4,4,5,4,5,4,5,4,5,4,4,0,0,0,0],
+  [0,4,4,5,5,4,5,4,5,5,4,4,0,0,0,0],
+  [0,4,4,5,4,5,4,5,4,5,4,4,0,0,0,0],
+  [0,0,4,4,5,4,4,4,5,4,4,0,0,0,0,0],
+  [0,0,0,4,4,4,4,4,4,4,0,0,0,0,0,0],
+  [0,0,0,0,6,6,0,0,6,6,0,0,0,0,0,0],
+  [0,0,0,6,6,6,0,0,6,6,6,0,0,0,0,0],
+  [0,0,0,6,6,0,0,0,0,6,6,0,0,0,0,0],
 ];
 const KOOPA_SHELL = [
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,4,4,4,4,0,0,0,0,0,0,0],
   [0,0,0,0,4,4,4,4,4,4,0,0,0,0,0,0],
   [0,0,0,4,4,5,4,4,5,4,4,0,0,0,0,0],
-  [0,0,4,4,5,5,4,4,5,5,4,4,0,0,0,0],
-  [0,0,4,4,5,5,4,4,5,5,4,4,0,0,0,0],
+  [0,0,4,4,5,5,4,5,5,4,4,4,0,0,0,0],
+  [0,0,4,4,5,4,5,4,5,4,4,4,0,0,0,0],
+  [0,0,4,4,5,5,4,5,5,4,4,4,0,0,0,0],
   [0,0,0,4,4,5,4,4,5,4,4,0,0,0,0,0],
   [0,0,0,0,4,4,4,4,4,4,0,0,0,0,0,0],
-  [0,0,0,6,6,6,6,6,6,6,6,0,0,0,0,0],
+  [0,0,0,4,4,4,4,4,4,4,4,0,0,0,0,0],
+  [0,0,0,0,6,6,6,6,6,6,0,0,0,0,0,0],
+  [0,0,0,0,0,6,6,6,6,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 ];
 const KOOPA_PALETTE = { 1: COL.koopa, 2: COL.white, 3: COL.black, 4: COL.koopa, 5: COL.koopaDark, 6: '#fcbcb0' };
+
+const BOO_SPRITE = [
+  [0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0],
+  [0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0],
+  [0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0],
+  [0,1,1,2,2,1,1,1,2,2,1,1,1,0,0,0],
+  [0,1,1,2,2,1,1,1,2,2,1,1,1,0,0,0],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+  [1,1,1,1,2,2,2,2,2,1,1,1,1,1,0,0],
+  [0,1,1,2,1,1,2,1,1,2,1,1,1,0,0,0],
+  [0,1,1,1,2,2,2,2,2,1,1,1,0,0,0,0],
+  [0,0,1,1,1,1,3,1,1,1,1,1,0,0,0,0],
+  [0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0],
+  [0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0],
+  [0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0],
+  [0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+];
+const BOO_PALETTE = { 1: '#fcfcfc', 2: '#000000', 3: '#e44060' };
 
 // Bowser boss sprite (32x32)
 const BOWSER_SPRITE = [
@@ -1227,6 +1247,14 @@ function spawnEnemies() {
   [[58, 11], [68, 10], [78, 10], [88, 9], [200, 11], [207, 10], [310, 11], [320, 10], [330, 11]].forEach(([px, topRow]) => {
     entities.push(createPiranha(px, topRow));
   });
+
+  [[132, 8], [152, 7], [175, 8], [198, 7], [218, 8], [245, 7], [270, 8], [298, 7], [322, 8]].forEach(([x, row]) => {
+    entities.push(createFlyGoomba(x * TILE, row * TILE));
+  });
+
+  [[140, 8], [170, 9], [205, 7], [238, 8], [272, 9], [305, 7], [328, 8]].forEach(([x, row]) => {
+    entities.push(createBoo(x * TILE, row * TILE));
+  });
 }
 
 function spawnMapCoins() {
@@ -1296,6 +1324,23 @@ function createBuzzyBeetle(x, y) {
   };
 }
 
+function createFlyGoomba(x, y) {
+  return {
+    type: 'flygoomba', x, y, vx: -0.5, vy: 0,
+    w: 16, h: 16, alive: true, flat: false, flatTimer: 0,
+    frame: 0, frameTimer: 0,
+    baseY: y, flyTimer: Math.random() * Math.PI * 2,
+  };
+}
+
+function createBoo(x, y) {
+  return {
+    type: 'boo', x, y, vx: 0, vy: 0,
+    w: 14, h: 14, alive: true,
+    shy: false, bobOffset: Math.random() * Math.PI * 2,
+  };
+}
+
 function createPiranha(pipeX, pipeTopY) {
   return {
     type: 'piranha', x: pipeX * TILE + 6, y: pipeTopY * TILE,
@@ -1310,7 +1355,7 @@ function addScorePopup(x, y, pts) {
   scorePopups.push({ x, y, text: String(pts), life: 50, vy: -0.8 });
 }
 
-const ENEMY_POINTS = { goomba: 100, koopa: 200, buzzy: 300, piranha: 400, boss: 5000 };
+const ENEMY_POINTS = { goomba: 100, koopa: 200, buzzy: 300, piranha: 400, boss: 5000, flygoomba: 150, boo: 200 };
 
 // ================================================================
 // COLLISION
@@ -1418,7 +1463,7 @@ function hitBlock(tx, ty) {
   });
 
   entities.forEach(e => {
-    if (!e.alive || e.type === 'piranha') return;
+    if (!e.alive || e.type === 'piranha' || e.type === 'boo') return;
     const blockTop = ty * TILE;
     if (Math.abs(e.y + e.h - blockTop) < 4 &&
         e.x + e.w > tx * TILE && e.x < (tx + 1) * TILE) {
@@ -1746,7 +1791,7 @@ function mariodie() {
 // ================================================================
 function updateEntities() {
   entities.forEach(e => {
-    if (!e.alive && (e.type === 'goomba' || e.type === 'buzzy') && e.flat) {
+    if (!e.alive && (e.type === 'goomba' || e.type === 'buzzy' || e.type === 'flygoomba') && e.flat) {
       e.flatTimer--;
       if (e.flatTimer <= 0) e.remove = true;
       return;
@@ -1792,6 +1837,74 @@ function updateEntities() {
       }
       if (mario.invincible > 0) return;
       if (mx < e.x + e.w && mx + mw > e.x && my < e.y + visH && my + mh > e.y) {
+        mariodie();
+      }
+      return;
+    }
+
+    if (e.type === 'flygoomba') {
+      if (e.x > camera.x + VIEW_W + 48 || e.x < camera.x - 80) return;
+      e.flyTimer += 0.04;
+      e.x += e.vx;
+      let fhc = tileCollision(e.x + 2, e.y, e.w - 4, e.h);
+      if (fhc) { e.vx = -e.vx; e.x += e.vx * 2; }
+      e.y = e.baseY + Math.sin(e.flyTimer) * 24;
+      e.frameTimer++;
+      if (e.frameTimer > 14) { e.frameTimer = 0; e.frame = (e.frame + 1) % 2; }
+      if (mario.dead || flagDescending) return;
+      const mx = mario.x + 2, mw = mario.w - 4;
+      const mh = mario.big ? (mario.crouching ? 16 : 24) : 16;
+      const my = mario.big && mario.crouching ? mario.y + 8 : mario.y;
+      if (mario.starPower > 0 && mx < e.x + e.w && mx + mw > e.x && my < e.y + e.h && my + mh > e.y) {
+        e.alive = false; e.remove = true;
+        score += ENEMY_POINTS.flygoomba; enemiesKilled++;
+        addScorePopup(e.x, e.y - 8, ENEMY_POINTS.flygoomba);
+        playSound('stomp');
+        return;
+      }
+      if (mario.invincible > 0) return;
+      if (mx < e.x + e.w && mx + mw > e.x && my < e.y + e.h && my + mh > e.y) {
+        if (mario.vy > 0 && my + mh - e.y < 10) {
+          e.alive = false; e.flat = true; e.flatTimer = 30; e.vx = 0;
+          score += ENEMY_POINTS.flygoomba; enemiesKilled++;
+          addScorePopup(e.x, e.y - 8, ENEMY_POINTS.flygoomba);
+          playSound('stomp');
+          mario.vy = -4.5;
+        } else {
+          mariodie();
+        }
+      }
+      return;
+    }
+
+    if (e.type === 'boo') {
+      if (e.x > camera.x + VIEW_W + 80 || e.x < camera.x - 80) return;
+      const marioFacingBoo = (mario.facing === 1 && e.x + e.w / 2 > mario.x) ||
+                             (mario.facing === -1 && e.x + e.w / 2 < mario.x + mario.w);
+      e.shy = marioFacingBoo && !mario.dead;
+      if (!e.shy && !mario.dead) {
+        const dx = mario.x - e.x;
+        const dy = (mario.y + mario.h / 2) - (e.y + e.h / 2);
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 2) {
+          const spd = 0.6;
+          e.x += (dx / dist) * spd;
+          e.y += (dy / dist) * spd;
+        }
+      }
+      if (mario.dead || flagDescending) return;
+      const mx = mario.x + 2, mw = mario.w - 4;
+      const mh = mario.big ? (mario.crouching ? 16 : 24) : 16;
+      const my = mario.big && mario.crouching ? mario.y + 8 : mario.y;
+      if (mario.starPower > 0 && mx < e.x + e.w && mx + mw > e.x && my < e.y + e.h && my + mh > e.y) {
+        e.alive = false; e.remove = true;
+        score += ENEMY_POINTS.boo; enemiesKilled++;
+        addScorePopup(e.x, e.y - 8, ENEMY_POINTS.boo);
+        playSound('stomp');
+        return;
+      }
+      if (mario.invincible > 0 || e.shy) return;
+      if (mx < e.x + e.w && mx + mw > e.x && my < e.y + e.h && my + mh > e.y) {
         mariodie();
       }
       return;
@@ -1895,7 +2008,7 @@ function updateEntities() {
     if (shell.type !== 'koopa' || !shell.shell || !shell.shellMoving || !shell.alive) return;
     entities.forEach(other => {
       if (other === shell || !other.alive) return;
-      if (other.type === 'piranha') return;
+      if (other.type === 'piranha' || other.type === 'boo') return;
       if (shell.x < other.x + other.w && shell.x + shell.w > other.x &&
           shell.y < other.y + other.h && shell.y + shell.h > other.y) {
         if (other.type === 'buzzy') {
@@ -2195,6 +2308,7 @@ function updateMarioFireballs() {
     entities.forEach(e => {
       if (!e.alive) return;
       if (e.type === 'piranha' && e.emergeOffset >= 0) return;
+      if (e.type === 'boo') return;
       if (fb.x + fb.w > e.x && fb.x < e.x + e.w &&
           fb.y + fb.h > e.y && fb.y < e.y + e.h) {
         if (e.type === 'buzzy') {
@@ -2478,21 +2592,25 @@ function drawBackground() {
   const hillLight = '#80d010';
   function drawHill3(cx, outerR) {
     if (cx + outerR < -20 || cx - outerR > VIEW_W + 20) return;
+    const belowGY = VIEW_H - GY + 4;
     bx.fillStyle = hillDark;
     bx.beginPath();
     bx.arc(cx, GY, outerR, Math.PI, 0, false);
     bx.closePath();
     bx.fill();
+    bx.fillRect(cx - outerR, GY, outerR * 2, belowGY);
     bx.fillStyle = hillMid;
     bx.beginPath();
     bx.arc(cx, GY, outerR * 0.7, Math.PI, 0, false);
     bx.closePath();
     bx.fill();
+    bx.fillRect(cx - outerR * 0.7, GY, outerR * 1.4, belowGY);
     bx.fillStyle = hillLight;
     bx.beginPath();
     bx.arc(cx, GY, outerR * 0.3, Math.PI, 0, false);
     bx.closePath();
     bx.fill();
+    bx.fillRect(cx - outerR * 0.3, GY, outerR * 0.6, belowGY);
   }
   for (let base = -CYCLE; base < totalLen + CYCLE; base += CYCLE) {
     drawHill3(Math.floor((base + 0) - camera.rx * 0.4), 5 * T);
@@ -2697,17 +2815,45 @@ function drawMario() {
 
 function drawEntities() {
   entities.forEach(e => {
-    if (!e.alive && e.type !== 'goomba' && e.type !== 'buzzy') return;
+    if (!e.alive && e.type !== 'goomba' && e.type !== 'buzzy' && e.type !== 'flygoomba') return;
     const sx = Math.floor(e.x - camera.rx);
     if (sx < -TILE || sx > VIEW_W + TILE) return;
 
-    if (e.type === 'goomba') {
+    if (e.type === 'flygoomba') {
+      drawPixels(bx, sx, Math.floor(e.y), e.flat ? GOOMBA_FLAT : GOOMBA_SPRITE, GOOMBA_PALETTE, e.frame === 1);
+      if (!e.flat) {
+        const wingFlap = Math.sin(e.flyTimer * 6) > 0;
+        const wy = Math.floor(e.y) + 5;
+        bx.fillStyle = '#fcfcfc';
+        bx.beginPath();
+        if (wingFlap) {
+          bx.moveTo(sx - 1, wy + 4); bx.lineTo(sx - 6, wy - 2); bx.lineTo(sx - 6, wy + 1); bx.lineTo(sx - 1, wy + 4);
+        } else {
+          bx.moveTo(sx - 1, wy + 2); bx.lineTo(sx - 5, wy + 5); bx.lineTo(sx - 5, wy + 3); bx.lineTo(sx - 1, wy + 2);
+        }
+        bx.fill();
+        bx.beginPath();
+        if (wingFlap) {
+          bx.moveTo(sx + 17, wy + 4); bx.lineTo(sx + 22, wy - 2); bx.lineTo(sx + 22, wy + 1); bx.lineTo(sx + 17, wy + 4);
+        } else {
+          bx.moveTo(sx + 17, wy + 2); bx.lineTo(sx + 21, wy + 5); bx.lineTo(sx + 21, wy + 3); bx.lineTo(sx + 17, wy + 2);
+        }
+        bx.fill();
+      }
+    } else if (e.type === 'boo') {
+      const booBob = Math.sin(globalTick * 0.06 + e.bobOffset) * 3;
+      const faceMario = e.x + e.w / 2 > mario.x + mario.w / 2;
+      bx.save();
+      bx.globalAlpha = e.shy ? 0.3 : 0.75;
+      drawPixels(bx, sx, Math.floor(e.y + booBob), BOO_SPRITE, BOO_PALETTE, !faceMario);
+      bx.restore();
+    } else if (e.type === 'goomba') {
       drawPixels(bx, sx, Math.floor(e.y), e.flat ? GOOMBA_FLAT : GOOMBA_SPRITE, GOOMBA_PALETTE, e.frame === 1);
     } else if (e.type === 'koopa') {
       if (e.shell) {
         drawPixels(bx, sx, Math.floor(e.y), KOOPA_SHELL, KOOPA_PALETTE, false);
       } else {
-        drawPixels(bx, sx, Math.floor(e.y) - 8, KOOPA_SPRITE, KOOPA_PALETTE, e.vx > 0);
+        drawPixels(bx, sx, Math.floor(e.y) + e.h - 16, KOOPA_SPRITE, KOOPA_PALETTE, e.vx > 0);
       }
     } else if (e.type === 'buzzy') {
       drawPixels(bx, sx, Math.floor(e.y), e.flat ? BUZZY_FLAT : BUZZY_SPRITE, BUZZY_PALETTE, e.frame === 1);
