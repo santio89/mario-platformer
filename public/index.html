@@ -161,21 +161,6 @@
   }
   .color-swatch:hover { transform: scale(1.15); box-shadow: 0 3px 8px rgba(0,0,0,0.5); }
   .color-swatch.selected { border-color: #fff; transform: scale(1.15); box-shadow: 0 0 8px rgba(255,255,255,0.4); }
-  .color-swatch.taken {
-    opacity: 0.25;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-  .color-swatch.taken::after {
-    content: 'X';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    color: #fff;
-    font-size: 12px;
-    font-weight: bold;
-    text-shadow: 1px 1px 0 #000;
-  }
 
   .spinner {
     display: inline-block;

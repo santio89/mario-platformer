@@ -139,13 +139,7 @@ io.on('connection', (socket) => {
     if (room.state !== 'waiting') return callback({ ok: false, error: 'Game already started' });
     if (room.players.size >= MAX_PLAYERS) return callback({ ok: false, error: 'Room full (max ' + MAX_PLAYERS + ')' });
 
-    const takenColors = Array.from(room.players.values()).map(p => p.color);
-    let finalColor = color || 'red';
-    if (takenColors.includes(finalColor)) {
-      const ALL_COLORS = ['red','green','blue','yellow','purple','white','black','orange','cyan','pink'];
-      const available = ALL_COLORS.filter(c => !takenColors.includes(c));
-      finalColor = available.length > 0 ? available[Math.floor(Math.random() * available.length)] : 'red';
-    }
+    const finalColor = color || 'red';
 
     playerId = 'p_' + Math.random().toString(36).substring(2, 10);
     const playerData = {
@@ -170,11 +164,6 @@ io.on('connection', (socket) => {
     if (!playerRoom || !playerId) return;
     const room = rooms.get(playerRoom);
     if (!room || room.state !== 'waiting') return;
-
-    const takenColors = Array.from(room.players.values())
-      .filter(p => p.id !== playerId)
-      .map(p => p.color);
-    if (takenColors.includes(color)) return;
 
     const player = room.players.get(playerId);
     if (player) {

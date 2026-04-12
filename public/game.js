@@ -1056,7 +1056,14 @@ let jumpBufferTimer = 0;
 let jumpPressed = false;
 let jumpHeld = false;
 
+let showTabScoreboard = false;
+
 window.addEventListener('keydown', e => {
+  if (e.code === 'Tab') {
+    e.preventDefault();
+    showTabScoreboard = true;
+    return;
+  }
   if (e.repeat) return;
   keys[e.code] = true;
   if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
@@ -1099,6 +1106,11 @@ window.addEventListener('keydown', e => {
 });
 
 window.addEventListener('keyup', e => {
+  if (e.code === 'Tab') {
+    e.preventDefault();
+    showTabScoreboard = false;
+    return;
+  }
   keys[e.code] = false;
   if (e.code === 'Space' || e.code === 'ArrowUp') {
     jumpHeld = false;
@@ -3154,11 +3166,12 @@ function drawCastle() {
 function drawProgressBar() {
   if (!multiplayerMode || racePlayers.length === 0) return;
 
-  if (!eliminated) {
-    const me = racePlayers.find(p => p.id === myPlayerId);
-    if (me && !me.finished && me.alive) {
+  const me = racePlayers.find(p => p.id === myPlayerId);
+  if (me) {
+    if (!me.finished) {
       me.progress = Math.min(1, mario.x / ((LEVEL_WIDTH - 15) * TILE));
     }
+    me.alive = !eliminated && lives > 0 && !mario.dead;
   }
 
   const barX = 16;
@@ -3166,8 +3179,9 @@ function drawProgressBar() {
   const barW = VIEW_W - 32;
   const barH = 3;
 
-  bx.fillStyle = 'rgba(0,0,0,0.5)';
-  bx.fillRect(barX - 1, barY - 1, barW + 2, barH + 4);
+  const bgPad = 2;
+  bx.fillStyle = 'rgba(0,0,0,0.45)';
+  bx.fillRect(barX - 1, barY - bgPad, barW + 2, barH + bgPad * 2);
 
   bx.fillStyle = '#555';
   bx.fillRect(barX, barY + 1, barW, 1);
@@ -3184,23 +3198,102 @@ function drawProgressBar() {
     const col = getPlayerDisplayColor(p.color || 'red');
     const progress = Math.max(0, Math.min(1, p.progress || 0));
     const px = barX + Math.round(progress * (barW - 4));
+    const letter = (p.name || '?')[0].toUpperCase();
+    const dead = !p.alive && !p.finished;
+    const bgCol = dead ? '#555' : col;
+    const sz = 7;
+    const barCenterY = barY + Math.floor(barH / 2);
+    const sx = px - Math.floor(sz / 2);
+    const sy = barCenterY - Math.floor(sz / 2);
+
+    bx.fillStyle = bgCol;
+    bx.fillRect(sx, sy, sz, sz);
+
+    bx.font = 'bold 7px Arial, sans-serif';
+    bx.textAlign = 'center';
+    bx.textBaseline = 'middle';
+    bx.fillStyle = '#000';
+    bx.fillText(letter, sx + sz / 2 + 0.5, sy + sz / 2 + 1);
+    bx.fillStyle = '#fff';
+    bx.fillText(letter, sx + sz / 2, sy + sz / 2 + 0.5);
+  });
+}
+
+function drawTabScoreboard() {
+  if (!showTabScoreboard || !multiplayerMode || racePlayers.length === 0) return;
+
+  const players = racePlayers.slice().sort((a, b) => {
+    if (a.finished && b.finished) return (a.finishTime || 0) - (b.finishTime || 0);
+    if (a.finished) return -1;
+    if (b.finished) return 1;
+    return (b.progress || 0) - (a.progress || 0);
+  });
+
+  const panelW = 220;
+  const rowH = 12;
+  const headerH = 14;
+  const padX = 6;
+  const padY = 4;
+  const panelH = headerH + padY * 2 + players.length * rowH + 10;
+  const panelX = Math.round((VIEW_W - panelW) / 2);
+  const panelY = Math.round((VIEW_H - panelH) / 2);
+
+  bx.fillStyle = 'rgba(0,0,0,0.85)';
+  bx.fillRect(panelX, panelY, panelW, panelH);
+  bx.strokeStyle = '#f8d830';
+  bx.lineWidth = 1;
+  bx.strokeRect(panelX + 0.5, panelY + 0.5, panelW - 1, panelH - 1);
+
+  const hY = panelY + padY;
+  const col1 = panelX + padX;
+  const col2 = panelX + padX + 14;
+  const col3 = panelX + padX + 90;
+  const col4 = panelX + padX + 135;
+  const col5 = panelX + padX + 175;
+
+  drawPixelText(bx, '#', col1, hY, '#f8d830', null);
+  drawPixelText(bx, 'PLAYER', col2, hY, '#f8d830', null);
+  drawPixelText(bx, 'PROG', col3, hY, '#f8d830', null);
+  drawPixelText(bx, 'COINS', col4, hY, '#f8d830', null);
+  drawPixelText(bx, 'SCORE', col5, hY, '#f8d830', null);
+
+  bx.fillStyle = '#f8d830';
+  bx.fillRect(panelX + 3, hY + headerH - 4, panelW - 6, 1);
+
+  players.forEach((p, i) => {
+    const y = hY + headerH + i * rowH;
+    const col = getPlayerDisplayColor(p.color || 'red');
     const isMe = p.id === myPlayerId;
 
-    if (!p.alive && !p.finished) {
-      bx.fillStyle = '#666';
-      bx.fillRect(px, barY, 2, barH);
-    } else if (p.finished) {
-      bx.fillStyle = col;
-      bx.fillRect(px, barY - 1, 3, barH + 2);
-    } else {
-      bx.fillStyle = col;
-      if (isMe) {
-        bx.fillRect(px, barY - 1, 4, barH + 2);
-      } else {
-        bx.fillRect(px, barY, 3, barH);
-      }
+    if (isMe) {
+      bx.fillStyle = 'rgba(255,255,255,0.08)';
+      bx.fillRect(panelX + 2, y - 1, panelW - 4, rowH);
     }
+
+    const nameColor = isMe ? '#fff' : '#ccc';
+    drawPixelText(bx, String(i + 1), col1, y, nameColor, null);
+
+    bx.fillStyle = col;
+    bx.fillRect(col1 + 7, y + 1, 4, 4);
+
+    const displayName = (p.name || '???').substring(0, 10);
+    drawPixelText(bx, displayName, col2, y, nameColor, null);
+
+    let status;
+    if (p.finished) status = 'DONE';
+    else if (!p.alive) status = 'OUT';
+    else status = Math.round((p.progress || 0) * 100) + '%';
+    const statusCol = p.finished ? '#00e800' : !p.alive ? '#e44030' : '#fff';
+    drawPixelText(bx, status, col3, y, statusCol, null);
+
+    drawPixelText(bx, String(p.coins || 0), col4, y, '#f8d830', null);
+    drawPixelText(bx, String(p.gameScore || 0), col5, y, '#fff', null);
   });
+
+  const footY = panelY + panelH - 8;
+  const footText = 'HOLD TAB';
+  const footW = footText.length * 6;
+  drawPixelText(bx, footText, Math.round((VIEW_W - footW) / 2), footY, '#888', null);
 }
 
 function drawHUD() {
@@ -3266,6 +3359,7 @@ function render() {
     const goText = 'GAME OVER';
     const goW = goText.length * 6;
     drawPixelText(bx, goText, ((VIEW_W - goW) / 2) | 0, (VIEW_H / 2 - 4) | 0, '#e44030', '#000');
+    if (multiplayerMode) { drawProgressBar(); drawTabScoreboard(); }
     ctx.drawImage(buf, 0, 0, VIEW_W, VIEW_H, 0, 0, canvas.width, canvas.height);
     return;
   }
@@ -3277,6 +3371,7 @@ function render() {
     drawPixelText(bx, wText, ((VIEW_W - wW) / 2) | 0, (VIEW_H / 2 - 24) | 0, '#fff', null);
     drawPixels(bx, (VIEW_W / 2 - 16) | 0, (VIEW_H / 2 - 4) | 0, MARIO_STAND, buildPaletteFromColor(mySelectedColor), false);
     drawPixelText(bx, 'x  ' + (lives - 1), (VIEW_W / 2 + 6) | 0, (VIEW_H / 2) | 0, '#fff', null);
+    if (multiplayerMode) { drawProgressBar(); drawTabScoreboard(); }
     ctx.drawImage(buf, 0, 0, VIEW_W, VIEW_H, 0, 0, canvas.width, canvas.height);
     return;
   }
@@ -3362,6 +3457,8 @@ function render() {
     drawPixelText(bx, prText, Math.round((VIEW_W - prW) / 2), VIEW_H / 2 + 34, '#aaa', '#000');
   }
 
+  drawTabScoreboard();
+
   ctx.drawImage(buf, 0, 0, VIEW_W, VIEW_H, 0, 0, canvas.width, canvas.height);
 }
 
@@ -3438,7 +3535,6 @@ let roomMatchDuration = MATCH_DURATION;
 let matchEnding = false;
 let lastProgressWrite = 0;
 let mySelectedColor = 'red';
-let currentLobbyTakenColors = [];
 
 const MARIO_COLOR_OPTIONS = [
   { id: 'red',    label: 'Red',    hat: '#e44030', overalls: '#6b88ff', skin: '#fcbcb0', brown: '#ac7c00' },
@@ -3446,11 +3542,11 @@ const MARIO_COLOR_OPTIONS = [
   { id: 'blue',   label: 'Blue',   hat: '#3060f0', overalls: '#e44030', skin: '#fcbcb0', brown: '#ac7c00' },
   { id: 'yellow', label: 'Yellow', hat: '#f8d830', overalls: '#6040b0', skin: '#fcbcb0', brown: '#ac7c00' },
   { id: 'purple', label: 'Purple', hat: '#a040a0', overalls: '#f8d830', skin: '#fcbcb0', brown: '#ac7c00' },
-  { id: 'white',  label: 'White',  hat: '#fcfcfc', overalls: '#e44030', skin: '#fcbcb0', brown: '#ac7c00' },
-  { id: 'black',  label: 'Black',  hat: '#303030', overalls: '#e44030', skin: '#fcbcb0', brown: '#555555' },
+  { id: 'maroon', label: 'Maroon', hat: '#802020', overalls: '#f8d830', skin: '#fcbcb0', brown: '#ac7c00' },
   { id: 'orange', label: 'Orange', hat: '#f08020', overalls: '#00a800', skin: '#fcbcb0', brown: '#ac7c00' },
   { id: 'cyan',   label: 'Cyan',   hat: '#00e8d8', overalls: '#e44030', skin: '#fcbcb0', brown: '#ac7c00' },
   { id: 'pink',   label: 'Pink',   hat: '#fc74b4', overalls: '#fcfcfc', skin: '#fcbcb0', brown: '#ac7c00' },
+  { id: 'lime',   label: 'Lime',   hat: '#80d010', overalls: '#303030', skin: '#fcbcb0', brown: '#ac7c00' },
 ];
 
 function getColorOption(colorId) {
@@ -3472,28 +3568,23 @@ function getPlayerDisplayColor(colorId) {
   return c.hat;
 }
 
-function renderColorPicker(containerId, takenColors) {
+function renderColorPicker(containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
-  const taken = takenColors || [];
   container.innerHTML = MARIO_COLOR_OPTIONS.map(c => {
-    const isTaken = taken.includes(c.id);
     const isSelected = c.id === mySelectedColor;
     let cls = 'color-swatch';
     if (isSelected) cls += ' selected';
-    if (isTaken) cls += ' taken';
     return `<div class="${cls}" style="background:${c.hat};" data-color="${c.id}" onclick="selectColor('${containerId}','${c.id}')"></div>`;
   }).join('');
 }
 
 function selectColor(containerId, colorId) {
-  if (containerId === 'lobbyColorPicker' && currentLobbyTakenColors.includes(colorId)) return;
   mySelectedColor = colorId;
   if (containerId === 'lobbyColorPicker' && socket && socket.connected) {
     socket.emit('change_color', { color: colorId });
   }
-  const taken = containerId === 'lobbyColorPicker' ? currentLobbyTakenColors : [];
-  renderColorPicker(containerId, taken);
+  renderColorPicker(containerId);
 }
 
 function connectSocket() {
@@ -3641,20 +3732,21 @@ function updateLobbyPlayers(players) {
     return `<div style="color:${col}">${i === 0 ? '&#9733; ' : '  '}${p.name}${p.id === myPlayerId ? ' (You)' : ''}</div>`;
   }).join('');
 
-  currentLobbyTakenColors = players.filter(p => p.id !== myPlayerId).map(p => p.color).filter(Boolean);
-  renderColorPicker('lobbyColorPicker', currentLobbyTakenColors);
+  renderColorPicker('lobbyColorPicker');
 }
 
 function updateTimeline(players) {
   const div = document.getElementById('timelinePlayers');
+  if (!div) return;
   div.innerHTML = players.map((p, i) => {
     const pct = Math.round((p.progress || 0) * 100);
     const col = getPlayerDisplayColor(p.color || 'red');
     let status = '';
     if (p.finished) status = ` ${(p.finishTime / 1000).toFixed(1)}s`;
     else if (!p.alive) status = ' OUT';
+    const letter = (p.name || '?')[0].toUpperCase();
     return `<div class="timeline-player">
-      <div class="timeline-name" style="color:${col}">${p.name}${status}</div>
+      <div class="timeline-name"><span style="color:${col};font-weight:bold">${letter}</span> <span style="color:${col}">${p.name}${status}</span> <span style="color:#aaa;font-size:7px">${pct}%</span></div>
       <div class="timeline-bar-bg">
         <div class="timeline-bar-fill" style="width:${pct}%;background:${col};"></div>
       </div>
@@ -3765,7 +3857,7 @@ function showLobby(code, players) {
 function showSinglePlayerSetup() {
   hideAllMenuPanels();
   document.getElementById('menuSinglePlayer').style.display = '';
-  renderColorPicker('singleColorPicker', []);
+  renderColorPicker('singleColorPicker');
 }
 
 function startSinglePlayer() {
