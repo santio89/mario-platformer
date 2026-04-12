@@ -42,6 +42,8 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 100));
+window.addEventListener('load', resizeCanvas);
+document.addEventListener('DOMContentLoaded', resizeCanvas);
 
 // ================================================================
 // COLORS (NES palette)
