@@ -1002,12 +1002,14 @@ function buildLevel() {
 
   // Mushroom / Fire flower blocks
   map[9][22] = 4;
-  map[9][75] = 4;
-  map[9][118] = 4;
+  map[9][62] = 4;
+  map[9][96] = 4;
+  map[9][128] = 4;
   map[7][158] = 4;
-  map[9][196] = 4;
-  map[7][252] = 4;
-  map[9][295] = 4;
+  map[9][190] = 4;
+  map[7][222] = 4;
+  map[9][260] = 4;
+  map[7][300] = 4;
   map[9][335] = 4;
 
   // Section 8: Pre-boss area
