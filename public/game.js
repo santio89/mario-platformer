@@ -911,7 +911,7 @@ function buildLevel() {
   map[9][231] = 2;
   map[9][232] = 3;
   map[9][233] = 2;
-  map[5][231] = 4;
+  map[9][231] = 4;
   map[9][240] = 2;
   map[9][241] = 3;
   map[9][242] = 2;
@@ -930,7 +930,7 @@ function buildLevel() {
   map[7][267] = 3;
   map[7][276] = 3;
   map[7][285] = 3;
-  map[7][294] = 4;
+  map[9][302] = 4;
   ground(300, 305);
 
   // === SECTION 7: SPRINT & PIPES (305-335) ===
@@ -947,14 +947,13 @@ function buildLevel() {
 
   // === SECTION 8: GRAND FINALE (335-394) ===
   ground(336, 394);
-  stairUp(338, 4);
-  stairDown(343, 4);
 
-  // Boss arena: flat ground 347-358, gate at 359
-  for (let y = 6; y <= 12; y++) map[y][359] = 5;  // gate wall
+  // Boss arena: flat ground 348-358, gate at 359
+  for (let y = 6; y <= 12; y++) map[y][BOSS_GATE_X] = 5;
+  map[9][353] = 5;
 
-  // Victory staircase after boss (classic Mario ending)
-  stairUp(367, 8);
+  // Victory pyramid after boss
+  stairUp(366, 8);
 
   // === ADDITIONAL FEATURES FOR DIVERSITY ===
 
@@ -982,7 +981,7 @@ function buildLevel() {
   map[9][195] = 2; map[9][196] = 3; map[9][197] = 2;
 
   // Section 5: Elevated coin platforms
-  map[7][220] = 3; map[7][221] = 2; map[7][222] = 3;
+  map[7][220] = 3; map[7][221] = 2;
   map[9][236] = 3; map[9][237] = 2;
 
   // Section 6: Multi-height platforms
@@ -1007,15 +1006,15 @@ function buildLevel() {
   map[9][62] = 4;
   map[9][96] = 4;
   map[9][128] = 4;
-  map[7][158] = 4;
+  map[9][158] = 4;
   map[9][190] = 4;
-  map[7][222] = 4;
+  map[9][222] = 4;
   map[9][260] = 4;
-  map[7][300] = 4;
+  map[9][300] = 4;
   map[9][335] = 4;
 
-  // Section 8: Pre-boss area
-  map[9][345] = 3;
+  // Section 8: Pre-boss power-up restock
+  map[9][343] = 4;
 
   return map;
 }
@@ -1038,9 +1037,9 @@ const SKID_DECEL = 0.22;
 const COYOTE_FRAMES = 6;
 const JUMP_BUFFER_FRAMES = 6;
 
-const FLAGPOLE_X = 376;
-const CASTLE_X = 381;
-const CHECKPOINT_XS = [120, 240];
+const FLAGPOLE_X = 379;
+const CASTLE_X = 384;
+const CHECKPOINT_XS = [120, 240, 338];
 
 // ================================================================
 // GAME STATE
@@ -1174,8 +1173,13 @@ let bossFireballs = [];
 let marioFireballs = [];
 let fireballCooldown = 0;
 let starMusicInterval = null;
-const BOSS_ARENA_LEFT = 347;
+const BOSS_ARENA_LEFT = 348;
 const BOSS_GATE_X = 359;
+const BOSS_ENTRANCE_X = 347;
+let bossIntroActive = false;
+let bossIntroTimer = 0;
+let bossDefeated = false;
+let bossEntranceSealed = false;
 
 function resetMario() {
   const spawnX = checkpointIndex >= 0 ? CHECKPOINT_XS[checkpointIndex] * TILE : 40;
@@ -1239,21 +1243,31 @@ function resetLevel() {
   checkpointMessageTimer = 0;
   boss = null;
   bossFireballs = [];
+  bossIntroActive = false;
+  bossIntroTimer = 0;
+  bossDefeated = false;
+  bossEntranceSealed = false;
   resetMario();
   spawnEnemies();
   spawnMapCoins();
-  spawnBoss();
+  if (multiplayerMode) {
+    spawnBoss();
+    boss.y = 10 * TILE;
+    boss.vy = 0;
+    for (let gy = 6; gy <= 12; gy++) levelMap[gy][BOSS_ENTRANCE_X] = 5;
+    bossEntranceSealed = true;
+  }
 }
 
 function spawnEnemies() {
   const goombaXs = [
-    20, 30, 42, 50, 53, 56,
-    60, 65, 72, 80, 82, 85, 95,
-    108, 112, 114, 120, 122, 135, 140, 150,
-    145, 148, 160, 168, 172, 188,
-    195, 197, 215, 217, 222, 224, 228, 230, 234, 238, 240, 244, 250, 252,
-    268, 277, 286, 295,
-    308, 312, 316, 318, 324, 328, 330, 332,
+    22, 35, 48,
+    63, 76, 86, 98,
+    108, 120, 136, 148, 155,
+    168, 190,
+    216, 230, 245,
+    268, 286, 295,
+    312, 325, 340,
   ];
   goombaXs.forEach(x => {
     let gy = 12 * TILE;
@@ -1262,11 +1276,11 @@ function spawnEnemies() {
     entities.push(createGoomba(x * TILE, gy));
   });
 
-  [45, 55, 75, 90, 125, 142, 160, 192, 220, 235, 248, 275, 300, 318, 325].forEach(x => {
+  [42, 70, 92, 142, 185, 225, 252, 305, 334].forEach(x => {
     entities.push(createKoopa(x * TILE, 12 * TILE));
   });
 
-  [110, 155, 225, 310].forEach(x => {
+  [115, 203, 240, 318].forEach(x => {
     entities.push(createBuzzyBeetle(x * TILE, 12 * TILE));
   });
 
@@ -1274,11 +1288,11 @@ function spawnEnemies() {
     entities.push(createPiranha(px, topRow));
   });
 
-  [[132, 8], [152, 7], [175, 8], [198, 7], [218, 8], [245, 7], [270, 8], [298, 7], [322, 8]].forEach(([x, row]) => {
+  [[138, 8], [175, 8], [222, 8], [274, 8], [302, 7], [331, 8]].forEach(([x, row]) => {
     entities.push(createFlyGoomba(x * TILE, row * TILE));
   });
 
-  [[140, 8], [170, 9], [205, 7], [238, 8], [272, 9], [305, 7], [328, 8]].forEach(([x, row]) => {
+  [[150, 8], [205, 7], [235, 8], [310, 7]].forEach(([x, row]) => {
     entities.push(createBoo(x * TILE, row * TILE));
   });
 }
@@ -1313,17 +1327,56 @@ function spawnMapCoins() {
 
 function spawnBoss() {
   boss = {
-    x: 354 * TILE, y: 10 * TILE,
-    vx: -0.5, vy: 0,
+    x: (BOSS_GATE_X - 3) * TILE, y: -32,
+    vx: 0, vy: 0,
     w: 28, h: 32,
     hp: 3, alive: true, dying: false, deathTimer: 0,
     jumpTimer: 0, fireTimer: 0,
     frame: 0, frameTimer: 0,
     invincible: 0,
-    arenaLeft: BOSS_ARENA_LEFT * TILE,
+    arenaLeft: (BOSS_ENTRANCE_X + 1) * TILE,
     arenaRight: (BOSS_GATE_X - 1) * TILE,
     onGround: false,
   };
+}
+
+function damageBoss(amount) {
+  boss.hp -= amount;
+  boss.invincible = 60;
+  mario.invincible = Math.max(mario.invincible, 60);
+  if (boss.hp <= 0) {
+    boss.alive = false;
+    boss.dying = true;
+    boss.vy = -5;
+    boss.deathTimer = 0;
+    score += ENEMY_POINTS.boss;
+    addScorePopup(boss.x, boss.y - 16, ENEMY_POINTS.boss);
+    enemiesKilled++;
+    playSound('bossdie');
+    bossDefeated = true;
+    for (let gy = 6; gy <= 12; gy++) {
+      levelMap[gy][BOSS_GATE_X] = 0;
+      levelMap[gy][BOSS_ENTRANCE_X] = 0;
+    }
+    for (let gy = 6; gy <= 12; gy++) {
+      for (let gx of [BOSS_GATE_X, BOSS_ENTRANCE_X]) {
+        for (let i = 0; i < 3; i++) {
+          particles.push({
+            type: 'debris',
+            x: gx * TILE + Math.random() * TILE,
+            y: gy * TILE + Math.random() * TILE,
+            vx: (gx === BOSS_GATE_X ? 1.5 : -1.5) * (0.5 + Math.random()),
+            vy: -2 - Math.random() * 3,
+            life: 50 + Math.random() * 30,
+          });
+        }
+      }
+    }
+  } else {
+    playSound('bosshit');
+    addScorePopup(boss.x, boss.y - 8, 500);
+    score += 500;
+  }
 }
 
 function createGoomba(x, y) {
@@ -1443,9 +1496,9 @@ function hitBlock(tx, ty) {
     } else {
       items.push({
         type: mario.big ? 'flower' : 'mushroom',
-        x: tx * TILE, y: ty * TILE - TILE,
+        x: tx * TILE + 2, y: ty * TILE - TILE + 2,
         vx: mario.big ? 0 : 1.0, vy: 0,
-        w: 16, h: 16,
+        w: 12, h: 12,
         emerging: true, emergeY: ty * TILE,
         active: true,
       });
@@ -1560,6 +1613,63 @@ function updateMario() {
     return;
   }
 
+  // Boss intro trigger
+  if (!bossIntroActive && !bossDefeated && !boss &&
+      mario.x >= (BOSS_ARENA_LEFT - 1) * TILE && !multiplayerMode) {
+    bossIntroActive = true;
+    bossIntroTimer = 0;
+    mario.vx = 0;
+    mario.vy = 0;
+  }
+
+  if (bossIntroActive) {
+    bossIntroTimer++;
+    mario.vx = 0;
+    mario.facing = 1;
+
+    // Seal entrance column (tiles rise from bottom to top)
+    if (bossIntroTimer >= 5 && !bossEntranceSealed) {
+      const tileIdx = Math.floor((bossIntroTimer - 5) / 3);
+      const row = 12 - tileIdx;
+      if (row >= 6) {
+        levelMap[row][BOSS_ENTRANCE_X] = 5;
+        if (tileIdx === 0) playSound('bump');
+      } else {
+        bossEntranceSealed = true;
+        playSound('bump');
+      }
+    }
+
+    // Boss drops in
+    if (bossIntroTimer === 35) {
+      spawnBoss();
+    }
+
+    if (boss && bossIntroTimer >= 35 && bossIntroTimer < 100) {
+      boss.vy += GRAVITY_DOWN;
+      if (boss.vy > MAX_FALL) boss.vy = MAX_FALL;
+      boss.y += boss.vy;
+      const bc = tileCollision(boss.x + 2, boss.y, boss.w - 4, boss.h);
+      if (bc && boss.vy > 0) {
+        boss.y = bc.ty * TILE - boss.h;
+        boss.vy = 0;
+        boss.onGround = true;
+      }
+    }
+
+    // Camera: center on the arena during intro
+    const arenaCenter = ((BOSS_ENTRANCE_X + BOSS_GATE_X) / 2) * TILE;
+    camera.targetX = arenaCenter - VIEW_W / 2;
+    camera.x += (camera.targetX - camera.x) * 0.08;
+    if (camera.x < 0) camera.x = 0;
+
+    // Unfreeze
+    if (bossIntroTimer >= 80) {
+      bossIntroActive = false;
+    }
+    return;
+  }
+
   // Crouch (Big Mario only)
   const wantCrouch = keys['ArrowDown'] && mario.big && mario.onGround;
   mario.crouching = wantCrouch;
@@ -1664,9 +1774,18 @@ function updateMario() {
   mario.y += mario.vy;
   mario.onGround = false;
 
-  let vCol = tileCollision(mario.x + 2, mario.y, mario.w - 4, mh);
-  if (vCol) {
-    if (mario.vy > 0) {
+  if (mario.vy < 0) {
+    // Going up: only check the head row for ceiling hits so big Mario's
+    // larger body doesn't false-collide with adjacent blocks (e.g. pipes).
+    let vCol = tileCollision(mario.x + 2, mario.y, mario.w - 4, 1);
+    if (vCol) {
+      mario.y = (vCol.ty + 1) * TILE;
+      mario.vy = 0;
+      hitBlock(vCol.tx, vCol.ty);
+    }
+  } else if (mario.vy > 0) {
+    let vCol = tileCollision(mario.x + 2, mario.y, mario.w - 4, mh);
+    if (vCol) {
       mario.y = vCol.ty * TILE - mh;
       mario.vy = 0;
       mario.onGround = true;
@@ -1676,10 +1795,6 @@ function updateMario() {
           { x: mario.x + mario.w / 2, y: mario.y + mh, vx: 0.4, vy: -0.3, life: 8 },
         );
       }
-    } else if (mario.vy < 0) {
-      mario.y = (vCol.ty + 1) * TILE;
-      mario.vy = 0;
-      hitBlock(vCol.tx, vCol.ty);
     }
   }
 
@@ -1701,15 +1816,16 @@ function updateMario() {
   // Pit death
   if (mario.y > LEVEL_HEIGHT * TILE) mariodie();
 
-  // Animation (only animate when actually moving)
+  // Animation
   if (!mario.onGround) {
     mario.frame = 0;
   } else if (mario.skidding) {
     mario.frame = 0;
-  } else if (mario.vx !== 0 && Math.abs(mario.vx) > 0.3) {
+  } else if (Math.abs(mario.vx) > 0.2) {
     mario.frameTimer++;
-    const animSpeed = Math.max(6, 14 - Math.abs(mario.vx) * 3);
-    if (mario.frameTimer > animSpeed) {
+    const speed = Math.abs(mario.vx);
+    const animSpeed = speed > 1.8 ? 3 : speed > 1.2 ? 4 : speed > 0.6 ? 6 : 8;
+    if (mario.frameTimer >= animSpeed) {
       mario.frameTimer = 0;
       mario.frame = (mario.frame + 1) % 3;
     }
@@ -2059,25 +2175,9 @@ function updateEntities() {
       if (shell.type !== 'koopa' || !shell.shell || !shell.shellMoving || !shell.alive) return;
       if (shell.x < boss.x + boss.w && shell.x + shell.w > boss.x &&
           shell.y < boss.y + boss.h && shell.y + shell.h > boss.y) {
-        boss.hp--;
-        boss.invincible = 40;
         shell.alive = false;
         shell.remove = true;
-        if (boss.hp <= 0) {
-          boss.alive = false;
-          boss.dying = true;
-          boss.vy = -5;
-          boss.deathTimer = 0;
-          score += ENEMY_POINTS.boss;
-          addScorePopup(boss.x, boss.y - 16, ENEMY_POINTS.boss);
-          enemiesKilled++;
-          playSound('bossdie');
-          for (let gy = 6; gy <= 12; gy++) levelMap[gy][BOSS_GATE_X] = 0;
-        } else {
-          playSound('bosshit');
-          addScorePopup(boss.x, boss.y - 8, 500);
-          score += 500;
-        }
+        damageBoss(1);
       }
     });
   }
@@ -2119,6 +2219,7 @@ function updateBoss() {
   }
 
   if (!boss.alive) return;
+  if (bossIntroActive) return;
 
   if (Math.abs(mario.x - boss.x) > VIEW_W * 1.5) return;
 
@@ -2197,40 +2298,15 @@ function updateBoss() {
 
   if (mario.starPower > 0 && boss.invincible <= 0 &&
       mx < boss.x + boss.w && mx + mw > boss.x && my < boss.y + boss.h && my + mh > boss.y) {
-    boss.hp -= 3;
-    boss.invincible = 40;
-    if (boss.hp <= 0) {
-      boss.alive = false; boss.dying = true; boss.vy = -5; boss.deathTimer = 0;
-      score += ENEMY_POINTS.boss; addScorePopup(boss.x, boss.y - 16, ENEMY_POINTS.boss);
-      enemiesKilled++; playSound('bossdie');
-      for (let gy = 6; gy <= 12; gy++) levelMap[gy][BOSS_GATE_X] = 0;
-    } else {
-      playSound('bosshit'); addScorePopup(boss.x, boss.y - 8, 500); score += 500;
-    }
+    damageBoss(3);
     return;
   }
 
   if (mario.invincible > 0) return;
   if (mx < boss.x + boss.w && mx + mw > boss.x && my < boss.y + boss.h && my + mh > boss.y) {
     if (mario.vy > 0 && my + mh - boss.y < 12 && boss.invincible <= 0) {
-      boss.hp--;
-      boss.invincible = 40;
       mario.vy = -6;
-      if (boss.hp <= 0) {
-        boss.alive = false;
-        boss.dying = true;
-        boss.vy = -5;
-        boss.deathTimer = 0;
-        score += ENEMY_POINTS.boss;
-        addScorePopup(boss.x, boss.y - 16, ENEMY_POINTS.boss);
-        enemiesKilled++;
-        playSound('bossdie');
-        for (let gy = 6; gy <= 12; gy++) levelMap[gy][BOSS_GATE_X] = 0;
-      } else {
-        playSound('bosshit');
-        addScorePopup(boss.x, boss.y - 8, 500);
-        score += 500;
-      }
+      damageBoss(1);
     } else if (boss.invincible <= 0) {
       mariodie();
     }
@@ -2354,24 +2430,8 @@ function updateMarioFireballs() {
     if (boss && boss.alive && boss.invincible <= 0 && !fb.remove) {
       if (fb.x + fb.w > boss.x && fb.x < boss.x + boss.w &&
           fb.y + fb.h > boss.y && fb.y < boss.y + boss.h) {
-        boss.hp--;
-        boss.invincible = 40;
         fb.remove = true;
-        if (boss.hp <= 0) {
-          boss.alive = false;
-          boss.dying = true;
-          boss.vy = -5;
-          boss.deathTimer = 0;
-          score += ENEMY_POINTS.boss;
-          addScorePopup(boss.x, boss.y - 16, ENEMY_POINTS.boss);
-          enemiesKilled++;
-          playSound('bossdie');
-          for (let gy = 6; gy <= 12; gy++) levelMap[gy][BOSS_GATE_X] = 0;
-        } else {
-          playSound('bosshit');
-          addScorePopup(boss.x, boss.y - 8, 500);
-          score += 500;
-        }
+        damageBoss(1);
       }
     }
   });
@@ -2805,8 +2865,10 @@ function drawMario() {
       sprite = BIG_MARIO_CROUCH;
     } else if (!mario.onGround) {
       sprite = BIG_MARIO_JUMP;
-    } else if (mario.vx !== 0 && Math.abs(mario.vx) > 0.3) {
-      sprite = [BIG_MARIO_STAND, BIG_MARIO_RUN1, BIG_MARIO_RUN2][mario.frame % 3];
+    } else if (mario.skidding) {
+      sprite = BIG_MARIO_RUN2;
+    } else if (Math.abs(mario.vx) > 0.2) {
+      sprite = [BIG_MARIO_RUN1, BIG_MARIO_STAND, BIG_MARIO_RUN2][mario.frame % 3];
     } else {
       sprite = BIG_MARIO_STAND;
     }
@@ -2815,8 +2877,8 @@ function drawMario() {
       sprite = MARIO_JUMP;
     } else if (mario.skidding) {
       sprite = MARIO_SKID;
-    } else if (mario.vx !== 0 && Math.abs(mario.vx) > 0.3) {
-      sprite = [MARIO_STAND, MARIO_RUN1, MARIO_RUN2][mario.frame % 3];
+    } else if (Math.abs(mario.vx) > 0.2) {
+      sprite = [MARIO_RUN1, MARIO_STAND, MARIO_RUN2][mario.frame % 3];
     } else {
       sprite = MARIO_STAND;
     }
@@ -2908,14 +2970,14 @@ function drawItems() {
     const iy = Math.floor(item.y);
     if (item.type === 'mushroom') {
       bx.fillStyle = COL.mushroom;
-      bx.fillRect(sx, iy, 16, 8);
-      bx.beginPath(); bx.arc(sx + 8, iy, 8, Math.PI, 0); bx.fill();
+      bx.fillRect(sx, iy + 1, 12, 6);
+      bx.beginPath(); bx.arc(sx + 6, iy + 1, 6, Math.PI, 0); bx.fill();
       bx.fillStyle = COL.mushroomSpots;
-      bx.fillRect(sx + 5, iy - 4, 6, 4);
+      bx.fillRect(sx + 3, iy - 2, 5, 3);
       bx.fillStyle = COL.marioSkin;
-      bx.fillRect(sx + 2, iy + 4, 12, 8);
-      bx.fillRect(sx + 4, iy + 8, 3, 4);
-      bx.fillRect(sx + 9, iy + 8, 3, 4);
+      bx.fillRect(sx + 1, iy + 4, 10, 6);
+      bx.fillRect(sx + 2, iy + 7, 3, 3);
+      bx.fillRect(sx + 7, iy + 7, 3, 3);
     } else if (item.type === 'flower') {
       const t = Math.floor(Date.now() / 120) % 4;
       const flowerCols = ['#e44030', '#ff8000', '#fcfcfc', '#ff8000'];
@@ -3008,17 +3070,18 @@ function drawBoss() {
   const faceMario = mario.x > boss.x;
   drawPixels(bx, sx - 2, sy, BOWSER_SPRITE, BOWSER_PALETTE, faceMario);
 
+  if (bossIntroActive) return;
+
   const barW = 30;
   const barX = sx - 1;
   const barY = sy - 12;
   bx.fillStyle = 'rgba(0,0,0,0.55)';
-  bx.fillRect(barX - 1, barY - 1, barW + 4, 11);
-  drawPixelText(bx, 'BOSS', barX + 4, barY, '#f8d830', null);
+  bx.fillRect(barX - 1, barY - 1, barW + 2, 6);
   bx.fillStyle = '#222';
-  bx.fillRect(barX, barY + 7, barW + 2, 3);
+  bx.fillRect(barX, barY + 1, barW, 3);
   const hpColor = boss.hp === 1 ? '#ff3030' : boss.hp === 2 ? '#ffaa00' : '#00e000';
   bx.fillStyle = hpColor;
-  bx.fillRect(barX, barY + 7, Math.ceil((barW + 2) * boss.hp / 3), 3);
+  bx.fillRect(barX, barY + 1, Math.ceil(barW * boss.hp / 3), 3);
 }
 
 function drawBossFireballs() {
@@ -3049,11 +3112,11 @@ function drawMarioFireballs() {
   });
 }
 
-function drawBossGate() {
-  if (!boss || !boss.alive) return;
-  const gx = Math.floor(BOSS_GATE_X * TILE - camera.rx);
+function drawBossColumn(col) {
+  const gx = Math.floor(col * TILE - camera.rx);
   if (gx < -TILE || gx > VIEW_W + TILE) return;
   for (let row = 6; row <= 12; row++) {
+    if (!isSolid(getTile(col, row))) continue;
     const gy = row * TILE;
     bx.fillStyle = '#8b4513';
     bx.fillRect(gx, gy, TILE, TILE);
@@ -3063,6 +3126,12 @@ function drawBossGate() {
     bx.fillRect(gx, gy, TILE, 1);
     bx.fillRect(gx, gy, 1, TILE);
   }
+}
+
+function drawBossGate() {
+  if (bossDefeated) return;
+  if (boss && boss.alive) drawBossColumn(BOSS_GATE_X);
+  if (bossEntranceSealed) drawBossColumn(BOSS_ENTRANCE_X);
 }
 
 function drawMapCoins() {
@@ -3999,8 +4068,31 @@ function toggleCRT() {
 })();
 
 // ================================================================
+// DEBUG: ?checkpoint=N URL param (localhost / 127.0.0.1 only)
+// ================================================================
+let _debugCheckpoint = -1;
+(function() {
+  const h = location.hostname;
+  if (h !== 'localhost' && h !== '127.0.0.1') return;
+  const cp = new URLSearchParams(location.search).get('checkpoint');
+  if (cp === null) return;
+  const idx = parseInt(cp, 10) - 1;
+  if (idx >= 0 && idx < CHECKPOINT_XS.length) {
+    _debugCheckpoint = idx;
+    checkpointIndex = idx;
+  }
+})();
+
+// ================================================================
 // INIT
 // ================================================================
 resetLevel();
-showMenu();
+if (_debugCheckpoint >= 0) {
+  multiplayerMode = false;
+  hideMenu();
+  gameState = 'playing';
+  lives = 3;
+} else {
+  showMenu();
+}
 requestAnimationFrame(gameLoop);
