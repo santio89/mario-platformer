@@ -1180,6 +1180,8 @@ let bossIntroActive = false;
 let bossIntroTimer = 0;
 let bossDefeated = false;
 let bossEntranceSealed = false;
+let bossOutroActive = false;
+let bossOutroTimer = 0;
 
 function resetMario() {
   const spawnX = checkpointIndex >= 0 ? CHECKPOINT_XS[checkpointIndex] * TILE : 40;
@@ -1247,6 +1249,8 @@ function resetLevel() {
   bossIntroTimer = 0;
   bossDefeated = false;
   bossEntranceSealed = false;
+  bossOutroActive = false;
+  bossOutroTimer = 0;
   resetMario();
   spawnEnemies();
   spawnMapCoins();
@@ -1354,6 +1358,8 @@ function damageBoss(amount) {
     enemiesKilled++;
     playSound('bossdie');
     bossDefeated = true;
+    bossOutroActive = true;
+    bossOutroTimer = 0;
     for (let gy = 6; gy <= 12; gy++) {
       levelMap[gy][BOSS_GATE_X] = 0;
       levelMap[gy][BOSS_ENTRANCE_X] = 0;
@@ -1589,13 +1595,22 @@ function updateMario() {
 
   if (flagDescending) {
     winTimer++;
+    const mh = mario.big ? 24 : 16;
+    const groundY = 13 * TILE - mh;
     mario.vy = 1.8;
     mario.y += mario.vy;
-    if (mario.y >= 12 * TILE) {
-      mario.y = 12 * TILE;
-      mario.vx = 1.5;
+    if (mario.y >= groundY) {
+      mario.y = groundY;
+      mario.vy = 0;
+      mario.onGround = true;
+      mario.vx = 1.0;
       mario.x += mario.vx;
       mario.facing = 1;
+      mario.frameTimer++;
+      if (mario.frameTimer > 6) {
+        mario.frameTimer = 0;
+        mario.frame = (mario.frame + 1) % 3;
+      }
     }
     if (winTimer > 200) {
       if (!multiplayerMode && timeBonus === 0 && time > 0) {
@@ -1613,19 +1628,30 @@ function updateMario() {
     return;
   }
 
-  // Boss intro trigger
+  // Boss intro trigger — fire when Mario is well inside the arena (col 349)
   if (!bossIntroActive && !bossDefeated && !boss &&
-      mario.x >= (BOSS_ARENA_LEFT - 1) * TILE && !multiplayerMode) {
+      mario.x >= (BOSS_ARENA_LEFT + 1) * TILE && !multiplayerMode) {
     bossIntroActive = true;
     bossIntroTimer = 0;
-    mario.vx = 0;
-    mario.vy = 0;
+  }
+
+  // Boss outro freeze (after defeating boss, columns crumble)
+  if (bossOutroActive) {
+    bossOutroTimer++;
+    if (mario.invincible > 0) mario.invincible--;
+    const arenaCenter = ((BOSS_ENTRANCE_X + BOSS_GATE_X + 1) / 2) * TILE;
+    camera.targetX = arenaCenter - VIEW_W / 2;
+    camera.x += (camera.targetX - camera.x) * 0.12;
+    if (camera.x < 0) camera.x = 0;
+    if (bossOutroTimer >= 70) {
+      bossOutroActive = false;
+    }
+    return;
   }
 
   if (bossIntroActive) {
     bossIntroTimer++;
-    mario.vx = 0;
-    mario.facing = 1;
+    if (mario.invincible > 0) mario.invincible--;
 
     // Seal entrance column (tiles rise from bottom to top)
     if (bossIntroTimer >= 5 && !bossEntranceSealed) {
@@ -1657,8 +1683,8 @@ function updateMario() {
       }
     }
 
-    // Camera: center on the arena during intro
-    const arenaCenter = ((BOSS_ENTRANCE_X + BOSS_GATE_X) / 2) * TILE;
+    // Camera: center on the arena during intro (account for tile width)
+    const arenaCenter = ((BOSS_ENTRANCE_X + BOSS_GATE_X + 1) / 2) * TILE;
     camera.targetX = arenaCenter - VIEW_W / 2;
     camera.x += (camera.targetX - camera.x) * 0.08;
     if (camera.x < 0) camera.x = 0;
@@ -1759,7 +1785,14 @@ function updateMario() {
   // Horizontal movement + collision
   mario.x += mario.vx;
   if (mario.x < 0) mario.x = 0;
-  if (mario.x < camera.x) mario.x = camera.x;
+  if (boss && boss.alive && bossEntranceSealed) {
+    const arenaLeftEdge = (BOSS_ENTRANCE_X + 1) * TILE;
+    const arenaRightEdge = BOSS_GATE_X * TILE - mario.w;
+    if (mario.x < arenaLeftEdge) { mario.x = arenaLeftEdge; mario.vx = 0; }
+    if (mario.x > arenaRightEdge) { mario.x = arenaRightEdge; mario.vx = 0; }
+  } else {
+    if (mario.x < camera.x) mario.x = camera.x;
+  }
   const mh = mario.big ? 24 : 16;
 
   let hCol = tileCollision(mario.x + 1, mario.y, mario.w - 2, mh);
@@ -1835,9 +1868,15 @@ function updateMario() {
   }
 
   // Camera (smooth lerp, float precision kept for tracking)
-  camera.targetX = mario.x - VIEW_W / 2 + 16;
-  if (camera.targetX < camera.x) camera.targetX = camera.x;
-  camera.x += (camera.targetX - camera.x) * 0.12;
+  if (boss && boss.alive && !bossIntroActive) {
+    const arenaCenter = ((BOSS_ENTRANCE_X + BOSS_GATE_X + 1) / 2) * TILE;
+    camera.targetX = arenaCenter - VIEW_W / 2;
+    camera.x += (camera.targetX - camera.x) * 0.12;
+  } else {
+    camera.targetX = mario.x - VIEW_W / 2 + 16;
+    if (camera.targetX < camera.x) camera.targetX = camera.x;
+    camera.x += (camera.targetX - camera.x) * 0.12;
+  }
   if (Math.abs(camera.targetX - camera.x) < 1.0) camera.x = camera.targetX;
   if (camera.x < 0) camera.x = 0;
   const maxCam = LEVEL_WIDTH * TILE - VIEW_W;
@@ -2226,9 +2265,9 @@ function updateBoss() {
   if (boss.invincible > 0) boss.invincible--;
 
   const phase = boss.hp;
-  const baseSpeed = phase === 1 ? 1.2 : phase === 2 ? 0.8 : 0.5;
-  const jumpInterval = phase === 1 ? 55 : phase === 2 ? 75 : 100;
-  const fireInterval = phase === 1 ? 55 : phase === 2 ? 70 : 90;
+  const baseSpeed = phase === 1 ? 1.05 : phase === 2 ? 0.7 : 0.45;
+  const jumpInterval = phase === 1 ? 80 : phase === 2 ? 100 : 130;
+  const fireInterval = phase === 1 ? 80 : phase === 2 ? 100 : 120;
   const facingDir = mario.x < boss.x ? -1 : 1;
 
   boss.vy += GRAVITY_DOWN;
@@ -2258,7 +2297,7 @@ function updateBoss() {
 
   boss.jumpTimer++;
   if (boss.jumpTimer > jumpInterval + Math.random() * 30 && boss.onGround) {
-    boss.vy = phase === 1 ? -7.5 : -6.5;
+    boss.vy = phase === 1 ? -6.5 : -5.5;
     boss.jumpTimer = 0;
   }
 
@@ -2269,18 +2308,12 @@ function updateBoss() {
     const fx = boss.x + (dir > 0 ? boss.w : -8);
     bossFireballs.push({
       x: fx, y: boss.y + 10,
-      vx: dir * (phase === 1 ? 3.2 : 2.5), vy: -1.5, life: 200,
+      vx: dir * (phase === 1 ? 2.5 : 2.0), vy: -1.5, life: 200,
     });
-    if (phase <= 2) {
+    if (Math.random() < 0.35) {
       bossFireballs.push({
         x: fx, y: boss.y + 6,
-        vx: dir * 2.0, vy: -3.0, life: 200,
-      });
-    }
-    if (phase === 1) {
-      bossFireballs.push({
-        x: fx, y: boss.y + 16,
-        vx: dir * 3.0, vy: -0.5, life: 200,
+        vx: dir * 1.6, vy: -2.5, life: 200,
       });
     }
     playSound('fireball');
